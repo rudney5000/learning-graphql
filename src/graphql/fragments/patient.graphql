@@ -1,0 +1,13 @@
+fragments PatientFields on Patient {
+    id
+    firstName
+    lastName
+}
+
+fragment PatientAppointments on Patient {
+    appointments {
+        id
+        reason
+        scheduledAt
+    }
+}
