@@ -1,4 +1,4 @@
-import type { Appointment, Patient } from "./types";
+import type { Appointment, GraphQLContext, Patient } from "./types";
 
 const fakePatients: Patient[] = [
     { id: "1", firstName: "Jean", "lastName": "Mbala"},
@@ -39,7 +39,13 @@ export const resolvers = {
             return fakePatients;
         },
 
-        patient: (_parent: unknown, args: PatientArgs): Patient | undefined => {
+        patient: (
+            _parent: unknown,
+            args: PatientArgs,
+            context: GraphQLContext
+        ): Patient | undefined => {
+            console.log("USER:", context.user);
+
             return fakePatients.find((p) => p.id === args.id);
         },
     },

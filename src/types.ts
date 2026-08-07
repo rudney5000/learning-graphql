@@ -10,3 +10,10 @@ export interface Appointment {
     scheduledAt: string;
     reason: string;
 }
+
+export interface GraphQLContext {
+    user: {
+        id: string;
+        role: string;
+    };
+}
