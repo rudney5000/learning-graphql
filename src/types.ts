@@ -11,14 +11,17 @@ export interface Appointment {
     reason: string;
 }
 
+export type UserRole = "DOCTOR" | "PATIENT" | "ADMIN"
+
 export interface GraphQLContext {
     user: {
         id: string;
-        role: string;
+        role: UserRole;
     } | null;
 }
 
 export interface Payload {
     sub: string;
-    role: string;
+    role: UserRole;
+    iat?: number;
 }

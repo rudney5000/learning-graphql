@@ -1,4 +1,5 @@
 import type { Appointment, GraphQLContext, Patient } from "./types";
+import {requireRole} from "./auth";
 
 const fakePatients: Patient[] = [
     { id: "1", firstName: "Jean", "lastName": "Mbala"},
@@ -46,9 +47,8 @@ export const resolvers = {
         ): Patient | undefined => {
             console.log("USER:", context.user);
 
-            if (context.user?.role !== "DOCTOR") {
-                throw new Error('Forbidden');
-            }
+            requireRole(context, "DOCTOR");
+
             return fakePatients.find(
                 (patient) => patient.id === args.id
             );
