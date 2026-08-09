@@ -46,7 +46,12 @@ export const resolvers = {
         ): Patient | undefined => {
             console.log("USER:", context.user);
 
-            return fakePatients.find((p) => p.id === args.id);
+            if (context.user?.role !== "DOCTOR") {
+                throw new Error('Forbidden');
+            }
+            return fakePatients.find(
+                (patient) => patient.id === args.id
+            );
         },
     },
 

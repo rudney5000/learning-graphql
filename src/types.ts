@@ -15,5 +15,10 @@ export interface GraphQLContext {
     user: {
         id: string;
         role: string;
-    };
+    } | null;
+}
+
+export interface Payload {
+    sub: string;
+    role: string;
 }

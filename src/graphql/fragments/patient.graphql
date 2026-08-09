@@ -1,4 +1,4 @@
-fragments PatientFields on Patient {
+fragment PatientFields on Patient {
     id
     firstName
     lastName
