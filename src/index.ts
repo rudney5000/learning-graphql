@@ -1,6 +1,7 @@
 import express from 'express'
 import { ApolloServer } from '@apollo/server'
 import { expressMiddleware } from '@apollo/server/express4';
+import cors from "cors";
 import jwt from "jsonwebtoken";
 import { resolvers } from './resolvers'
 import { typeDefs } from './schema'
@@ -19,6 +20,9 @@ await server.start();
 
 app.use(
     '/graphql',
+    cors({
+        origin: 'http://localhost:5173',
+    }),
     express.json(),
     expressMiddleware(server, {
         context: async ({ req }): Promise<GraphQLContext> => {
