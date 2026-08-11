@@ -1,7 +1,8 @@
 <script lang="ts">
 import Vue from 'vue'
-import {apolloClient} from "./apollo.ts";
-import {GET_PATIENTS} from "./graphql/queries/getPatients.ts";
+import {apolloClient} from "./apollo/apollo";
+import {GET_PATIENTS} from "./graphql/queries/getPatients";
+import {CREATE_PATIENT} from "./graphql/mutations/createPatient";
 
 interface Patient {
   id: string;
@@ -19,24 +20,48 @@ export default Vue.extend({
   },
 
   async mounted() {
-    this.loading = true;
-    try {
-      const { data } = await apolloClient.query<{
-        patients: Patient[];
-      }>({
-        query: GET_PATIENTS
-      });
-      if(data) {
-        this.patients = data.patients;
+    await this.getPatients();
+  },
+
+  methods: {
+    async getPatients() {
+      this.loading = true;
+      try {
+        const { data } = await apolloClient.query<{
+          patients: Patient[];
+        }>({
+          query: GET_PATIENTS
+        });
+        if(data) {
+          this.patients = data.patients;
+        }
+      } catch (error) {
+        this.error = error instanceof Error
+            ? error
+            : new Error('Unknown error');
+      } finally {
+        this.loading = false;
       }
-    } catch (error) {
-      this.error = error instanceof Error
-          ? error
-          : new Error('Unknown error');
-    } finally {
-      this.loading = false;
+
+      console.log("les patients", this.patients);
+    },
+    async createPatient() {
+      try {
+        const { data } = await apolloClient.mutate({
+          mutation: CREATE_PATIENT,
+          variables: {
+            input: {
+              firstName: "Paul",
+              lastName: "Nzuzi",
+            }
+          }
+        })
+
+        console.log("Created new patient", data)
+      } catch (error) {
+        console.error("Create patient error", error)
+      }
     }
-    console.log('Component mounted.', this.patients)
   }
 })
 </script>
@@ -63,6 +88,12 @@ export default Vue.extend({
         {{ patient.lastName }}
       </li>
     </ul>
+
+    <button
+        @click="createPatient"
+    >
+      Create patient
+    </button>
   </div>
 </template>
 
