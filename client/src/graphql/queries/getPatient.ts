@@ -1,9 +1,9 @@
 import gql from "graphql-tag";
 import {PATIENT_FIELDS} from "../fragments/patient";
 
-export const GET_PATIENTS = gql`
-    query GetPatients {
-        patients {
+export const GET_PATIENT = gql`
+    query GetPatient($id: ID!) {
+        patient(id: $id) {
             ...PatientFields
         }
     }

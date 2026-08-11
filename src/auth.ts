@@ -15,7 +15,7 @@ export const requireRole = (
     context: GraphQLContext,
     role: UserRole
 ) => {
-    const user = context.user;
+    const user = requireAuth(context);
     if (user.role !== role) {
         throw new Error("Forbidden");
     }
