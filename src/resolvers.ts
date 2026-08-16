@@ -17,10 +17,22 @@ interface PatientArgs {
     id: string;
 };
 
+interface AppointmentArgs {
+    id: string;
+};
+
 interface CreatePatientArgs {
     input: {
         firstName: string;
         lastName: string;
+    }
+}
+
+interface CreateAppointmentArgs {
+    input: {
+        patientId: string;
+        scheduledAt: string;
+        reason: string;
     }
 }
 
@@ -32,12 +44,25 @@ interface UpdatePatientArgs {
     }
 }
 
-let nextId = 3;
+interface UpdateAppointmentArgs {
+    id: string;
+    input: {
+        patientId?: string;
+        scheduledAt?: string;
+        reason?: string;
+    }
+}
+
+let nextPatientId = 3;
+let nextAppointmentId = 4;
 
 export const resolvers = {
     Query: {
         patients: (): Patient[] => {
             return fakePatients;
+        },
+        appointments: (): Appointment[] => {
+            return fakeAppointments;
         },
 
         patient: (
@@ -53,12 +78,24 @@ export const resolvers = {
                 (patient) => patient.id === args.id
             );
         },
+
+        appointment: (
+            _parent: unknown,
+            args: AppointmentArgs,
+            context: GraphQLContext
+        ): Appointment | undefined => {
+            requireRole(context, "DOCTOR");
+
+            return fakeAppointments.find(
+                (appointment) => appointment.id === args.id
+            )
+        }
     },
 
     Mutation: {
         createPatient: (_patient: unknown, args: CreatePatientArgs): Patient => {
             const newPatient: Patient = {
-                id: String(nextId++),
+                id: String(nextPatientId++),
                 firstName: args.input.firstName,
                 lastName: args.input.lastName
             };
@@ -79,6 +116,34 @@ export const resolvers = {
             const index = fakePatients.findIndex((p) => p.id === args.id)
             if(index === -1) return false
             fakePatients.splice(index, 1);
+            return true;
+        },
+        createAppointment: (_appointment: unknown, args: CreateAppointmentArgs): Appointment => {
+            const newAppointment: Appointment = {
+                id: `a${nextAppointmentId++}`,
+                patientId: args.input.patientId,
+                scheduledAt: args.input.scheduledAt,
+                reason: args.input.reason
+            };
+
+            fakeAppointments.push(newAppointment);
+            return newAppointment;
+        },
+        updateAppointment: (_patient: unknown, args: UpdateAppointmentArgs): Appointment | null => {
+            const appointment = fakeAppointments.find((appointment) => appointment.id === args.id);
+
+            if(!appointment) return null
+
+            if(args.input.patientId !== undefined) appointment.patientId = args.input.patientId;
+            if(args.input.scheduledAt !== undefined) appointment.scheduledAt = args.input.scheduledAt
+            if(args.input.reason !== undefined) appointment.reason = args.input.reason;
+
+            return appointment;
+        },
+        deleteAppointment: (_parent: unknown, args: AppointmentArgs): boolean => {
+            const index = fakeAppointments.findIndex((appointment) => appointment.id === args.id);
+            if(index === -1) return false
+            fakeAppointments.splice(index, 1);
             return true;
         }
     },
