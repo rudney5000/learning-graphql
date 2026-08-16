@@ -1,12 +1,11 @@
 import {ActionTree, GetterTree, MutationTree} from "vuex";
-import {Error} from "@apollo/server/src/plugin/schemaReporting/generated/operations";
 import {apolloClient} from "../../apollo/apollo";
-import {GET_PATIENTS} from "../../graphql/queries/getPatients";
-import {GET_PATIENT} from "../../graphql/queries/getPatient";
-import {CREATE_PATIENT} from "../../graphql/mutations/createPatient";
-import {PATIENT_FIELDS} from "../../graphql/fragments/patient";
-import {UPDATE_PATIENT} from "../../graphql/mutations/updatePatient";
-import {DELETE_PATIENT} from "../../graphql/mutations/deletePatient";
+import {GET_PATIENTS} from "../../graphql/patients/queries/getPatients";
+import {GET_PATIENT} from "../../graphql/patients/queries/getPatient";
+import {CREATE_PATIENT} from "../../graphql/patients/mutations/createPatient";
+import {PATIENT_FIELDS} from "../../graphql/patients/fragments/patient";
+import {UPDATE_PATIENT} from "../../graphql/patients/mutations/updatePatient";
+import {DELETE_PATIENT} from "../../graphql/patients/mutations/deletePatient";
 
 interface PatientsState {
     patients: Patient[];

@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import {PATIENT_FIELDS} from "../fragments/patient";
+import {PATIENT_FIELDS} from "../fragments/patient.ts";
 
 export const UPDATE_PATIENT = gql`
     mutation UpdatePatient(

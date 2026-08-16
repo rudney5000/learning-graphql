@@ -39,4 +39,5 @@ interface Appointment {
     patientId: string;
     scheduledAt: string;
     reason: string;
+    patient?: Patient;
 }
