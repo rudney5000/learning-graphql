@@ -41,3 +41,42 @@ interface Appointment {
     reason: string;
     patient?: Patient;
 }
+
+interface GetAppointmentsData {
+    appointments: Appointment[];
+}
+
+interface GetAppointmentData {
+    appointment: Appointment | null;
+}
+
+interface CreateAppointmentInput {
+    patientId: string;
+    scheduledAt: string;
+    reason: string;
+}
+
+interface CreateAppointmentData {
+    appointment: Appointment;
+}
+
+interface UpdateAppointmentData {
+    appointment: Appointment;
+}
+
+interface UpdateAppointmentInput {
+    id: string;
+    input: {
+        patientId?: string;
+        scheduledAt?: string;
+        reason?: string;
+    };
+}
+
+interface DeleteAppointmentInput {
+    id: string;
+}
+
+interface DeleteAppointmentData {
+    deleteAppointment: boolean;
+}

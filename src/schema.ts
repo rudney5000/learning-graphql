@@ -49,7 +49,7 @@ export const typeDefs = `#graphql
         updatePatient(id: ID!, input: UpdatePatientInput!): Patient!
         deletePatient(id: ID!): Boolean!
         
-        createAppointment(input: CreateAppointment!): Appointment!
+        createAppointment(input: CreateAppointmentInput!): Appointment!
         updateAppointment(id: ID!, input: UpdateAppointmentInput!): Appointment!
         deleteAppointment(id: ID!): Boolean!
     }

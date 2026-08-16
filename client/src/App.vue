@@ -9,6 +9,14 @@ export default Vue.extend({
   },
 
   computed: {
+    appointments(): Appointment[] {
+      return this.$store.getters["appointments/appointments"]
+    },
+
+    appointment(): Appointment | null{
+      return this.$store.getters["appointments/appointment"]
+    },
+
     patients(): Patient[] {
       return this.$store.getters["patients/patients"];
     },
@@ -24,14 +32,27 @@ export default Vue.extend({
     error(): Error | null {
       return this.$store.getters["patients/error"];
     },
+
+    appointmentsLoading(): boolean {
+      return this.$store.getters["appointments/loading"];
+    },
+
+    appointmentsError(): Error | null {
+      return this.$store.getters["appointments/error"];
+    },
   },
 
   async mounted() {
     await this.$store.dispatch("patients/getPatients")
     await this.$store.dispatch("patients/getPatient", "2")
+    await this.$store.dispatch("appointments/getAppointment", "a2")
+    await this.$store.dispatch("appointments/getAppointments")
     await this.createPatient()
     await this.updatePatient()
     await this.deletePatient()
+    await this.createAppointment()
+    await this.updateAppointment()
+    await this.deleteAppointment()
   },
 
   methods: {
@@ -56,8 +77,34 @@ export default Vue.extend({
 
     deletePatient() {
       return this.$store.dispatch("patients/deletePatient", "1")
+    },
+
+    createAppointment() {
+      return this.$store.dispatch("appointments/createAppointment", {
+        patientId: "2",
+        scheduledAt: new Date().toISOString(),
+        reason: "Consultation"
+      })
+    },
+    updateAppointment() {
+      if(!this.appointment) {
+        return
+      }
+
+      return this.$store.dispatch("appointments/updateAppointment", {
+        id: this.appointment.id,
+        input: {
+          reason: "Consultation Updated",
+        }
+      })
+    },
+    deleteAppointment() {
+      if(!this.appointment) {
+        return
+      }
+      return this.$store.dispatch("appointments/deleteAppointment", this.appointment.id);
     }
-  }
+  },
 });
 
 </script>
@@ -128,6 +175,36 @@ export default Vue.extend({
         @click="deletePatient"
     >
       Delete Patient
+    </button>
+
+    <h1> Appointments </h1>
+    <div v-if="appointmentsLoading">
+      Loading appointments ...
+    </div>
+    <div v-else-if="appointmentsError">
+      Error: {{ appointmentsError.message }}
+    </div>
+    <ul v-else>
+      <li
+          v-for="appointment in appointments"
+          :key="appointment.id"
+      >
+        <strong>{{ appointment.reason }}</strong>
+        -
+        {{ appointment.scheduledAt }}
+        -
+        Patient ID: {{ appointment.patientId }}
+      </li>
+    </ul>
+
+    <button @click="createAppointment">
+      Create Appointment
+    </button>
+    <button v-if="appointment" @click="updateAppointment">
+      Update Appointment
+    </button>
+    <button v-if="appointment" @click="deleteAppointment">
+      Delete Appointment
     </button>
   </div>
 </template>

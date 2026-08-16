@@ -1,13 +1,34 @@
-import {ActionTree, GetterTree, MutationTree} from "vuex";
-import {apolloClient} from "../../apollo/apollo";
-import {GET_PATIENTS} from "../../graphql/patients/queries/getPatients";
-import {GET_PATIENT} from "../../graphql/patients/queries/getPatient";
-import {CREATE_PATIENT} from "../../graphql/patients/mutations/createPatient";
-import {PATIENT_FIELDS} from "../../graphql/patients/fragments/patient";
-import {UPDATE_PATIENT} from "../../graphql/patients/mutations/updatePatient";
-import {DELETE_PATIENT} from "../../graphql/patients/mutations/deletePatient";
+import {
+    ActionTree,
+    GetterTree,
+    MutationTree
+} from "vuex";
+import {
+    apolloClient
+} from "../../apollo/apollo";
+import {
+    GET_PATIENTS
+} from "../../graphql/patients/queries/getPatients";
+import {
+    GET_PATIENT
+} from "../../graphql/patients/queries/getPatient";
+import {
+    CREATE_PATIENT
+} from "../../graphql/patients/mutations/createPatient";
+import {
+    PATIENT_FIELDS
+} from "../../graphql/patients/fragments/patient";
+import {
+    UPDATE_PATIENT
+} from "../../graphql/patients/mutations/updatePatient";
+import {
+    DELETE_PATIENT
+} from "../../graphql/patients/mutations/deletePatient";
+import {
+    RootState
+} from "../index";
 
-interface PatientsState {
+export interface PatientsState {
     patients: Patient[];
     patient: Patient | null;
     loading: boolean;
@@ -39,7 +60,7 @@ const mutations: MutationTree<PatientsState> = {
     }
 }
 
-const actions: ActionTree<PatientsState, unknown> = {
+const actions: ActionTree<PatientsState, RootState> = {
     async getPatients({ commit }) {
         commit("SET_LOADING", true)
         commit("SET_ERROR", null)
@@ -186,7 +207,7 @@ const actions: ActionTree<PatientsState, unknown> = {
 
 }
 
-const getters: GetterTree<PatientsState, unknown> = {
+const getters: GetterTree<PatientsState, RootState> = {
     patients: (state) => state.patients,
     patient: (state) => state.patient,
     loading: (state) => state.loading,
