@@ -43,6 +43,10 @@ export default Vue.extend({
   },
 
   async mounted() {
+    await this.$store.dispatch("auth/login", {
+      username: "doctor",
+      password: "1234",
+    })
     await this.$store.dispatch("patients/getPatients")
     await this.$store.dispatch("patients/getPatient", "2")
     await this.$store.dispatch("appointments/getAppointment", "a2")

@@ -1,3 +1,20 @@
+interface User {
+    id: string;
+    role: string;
+}
+
+interface LoginInput {
+    username: string;
+    password: string;
+}
+
+interface LoginData {
+    login: {
+        token: string;
+        user: User;
+    }
+}
+
 interface Patient {
     id: string;
     firstName: string;
