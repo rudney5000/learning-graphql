@@ -5,12 +5,6 @@ export const GET_APPOINTMENT = gql`
     query GetAppointment($id: ID!) {
         appointment(id: $id) {
             ...AppointmentFields
-            appointments {
-                id
-                patientId
-                scheduledAt
-                reason
-            }
         }
     }
     ${APPOINTMENT_FIELDS}

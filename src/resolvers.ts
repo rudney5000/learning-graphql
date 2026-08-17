@@ -2,7 +2,8 @@ import jwt from "jsonwebtoken";
 import type {
     Appointment,
     GraphQLContext,
-    Patient
+    Patient,
+    User
 } from "./types";
 import {
     JWT_SECRET,
@@ -79,6 +80,14 @@ let nextAppointmentId = 4
 
 export const resolvers = {
     Query: {
+        me: (
+            _parent: unknown,
+            _args: unknown,
+            context: GraphQLContext,
+        ): User | null => {
+            return context.user ?? null;
+        },
+
         patients: (): Patient[] => {
             return fakePatients;
         },

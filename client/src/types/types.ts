@@ -1,3 +1,7 @@
+interface MeData {
+    me: User | null;
+}
+
 interface User {
     id: string;
     role: string;

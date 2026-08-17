@@ -12,6 +12,7 @@ import {
 import {
     LOGIN
 } from "../../graphql/auth/mutations/login";
+import {ME} from "../../graphql/auth/queries/me.ts";
 
 interface AuthState {
     token: string | null;
@@ -47,6 +48,10 @@ const mutations: MutationTree<AuthState> = {
         state.user = payload.user
     },
 
+    SET_USER(state, user: User | null){
+        state.user = user
+    },
+
     LOGOUT(state) {
         state.token = null
         state.user = null
@@ -71,14 +76,30 @@ const actions: ActionTree<AuthState, RootState> = {
                 return
             }
 
-            const {
-                token,
-                user
-            } = data.login
+            commit("SET_USER", data.me)
+        } catch (error) {
+            commit("SET_ERROR", error as Error)
+        } finally {
+            commit("SET_LOADING", false)
+        }
+    },
 
-            localStorage.setItem("access_token", token)
+    async me ({ commit }){
+        commit("SET_LOADING", true)
+        commit("SET_ERROR", null)
 
-            commit("SET_AUTH", { token, user })
+        try {
+            const { data } = await apolloClient.query<MeData>({
+                query: ME
+            })
+            if (!data) {
+                return
+            }
+
+            commit("SET_AUTH", {
+                token: localStorage.getItem("access_token")!,
+                user: data.me
+            })
         } catch (error) {
             commit("SET_ERROR", error as Error)
         } finally {

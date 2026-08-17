@@ -24,6 +24,7 @@ export const typeDefs = `#graphql
     }
 
     type Query {
+        me: User!
         patients: [Patient!]!
         patient(id: ID!): Patient
         

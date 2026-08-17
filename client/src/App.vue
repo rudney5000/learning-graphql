@@ -9,6 +9,23 @@ export default Vue.extend({
   },
 
   computed: {
+
+    user(): User | null {
+      return this.$store.getters["auth/user"]
+    },
+
+    isAuthenticated(): boolean {
+      return this.$store.getters["auth/isAuthenticated"];
+    },
+
+    authLoading(): boolean {
+      return this.$store.getters["auth/loading"];
+    },
+
+    authError(): Error | null {
+      return this.$store.getters["auth/error"];
+    },
+
     appointments(): Appointment[] {
       return this.$store.getters["appointments/appointments"]
     },
@@ -43,20 +60,15 @@ export default Vue.extend({
   },
 
   async mounted() {
-    await this.$store.dispatch("auth/login", {
-      username: "doctor",
-      password: "1234",
-    })
+    await this.$store.dispatch("auth/me");
+
+    if(!this.isAuthenticated) {
+      return;
+    }
     await this.$store.dispatch("patients/getPatients")
     await this.$store.dispatch("patients/getPatient", "2")
     await this.$store.dispatch("appointments/getAppointment", "a2")
     await this.$store.dispatch("appointments/getAppointments")
-    await this.createPatient()
-    await this.updatePatient()
-    await this.deletePatient()
-    await this.createAppointment()
-    await this.updateAppointment()
-    await this.deleteAppointment()
   },
 
   methods: {
@@ -107,6 +119,10 @@ export default Vue.extend({
         return
       }
       return this.$store.dispatch("appointments/deleteAppointment", this.appointment.id);
+    },
+
+    logout() {
+      return this.$store.dispatch("auth/logout")
     }
   },
 });
@@ -115,6 +131,19 @@ export default Vue.extend({
 
 <template>
   <div>
+
+    <div v-if="isAuthenticated && user">
+      <p>
+        Connected user: {{ user.id }}
+      </p>
+      <p>
+        Role: {{ user.role }}
+      </p>
+      <button @click="logout">
+        Logout
+      </button>
+    </div>
+
     <p>Vue 2 + Vuex 3</p>
 
     <h1>Patients</h1>
