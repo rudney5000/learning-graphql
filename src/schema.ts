@@ -1,4 +1,14 @@
 export const typeDefs = `#graphql
+    type User {
+        id: ID!
+        role: String!
+    }
+
+    type AuthPayload {
+        token: String!
+        user: User!
+    }
+
     type Patient {
         id: ID!
         firstName: String!
@@ -45,6 +55,7 @@ export const typeDefs = `#graphql
     }
 
     type Mutation {
+        login(username: String, password: String): AuthPayload!
         createPatient(input: CreatePatientInput!): Patient!
         updatePatient(id: ID!, input: UpdatePatientInput!): Patient!
         deletePatient(id: ID!): Boolean!
