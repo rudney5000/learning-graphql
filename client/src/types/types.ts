@@ -2,7 +2,7 @@ interface MeData {
     me: User | null;
 }
 
-interface User {
+export interface User {
     id: string;
     role: string;
 }
@@ -35,7 +35,8 @@ interface GetPatientData {
 }
 
 interface CreatePatientInput {
-    createPatient: Patient;
+    firstName: string;
+    lastName: string;
 }
 
 interface CreatePatientData {
@@ -55,12 +56,16 @@ interface DeletePatientData {
     deletePatient: boolean;
 }
 
+interface UpdatePatientPayload {
+    id: string;
+    input: UpdatePatientInput;
+}
+
 interface Appointment {
     id: string;
     patientId: string;
     scheduledAt: string;
     reason: string;
-    patient?: Patient;
 }
 
 interface GetAppointmentsData {
@@ -78,20 +83,17 @@ interface CreateAppointmentInput {
 }
 
 interface CreateAppointmentData {
-    appointment: Appointment;
+    createAppointment: Appointment;
 }
 
 interface UpdateAppointmentData {
-    appointment: Appointment;
+    updateAppointment: Appointment;
 }
 
 interface UpdateAppointmentInput {
-    id: string;
-    input: {
-        patientId?: string;
-        scheduledAt?: string;
-        reason?: string;
-    };
+    patientId?: string;
+    scheduledAt?: string;
+    reason?: string;
 }
 
 interface DeleteAppointmentInput {
@@ -100,4 +102,9 @@ interface DeleteAppointmentInput {
 
 interface DeleteAppointmentData {
     deleteAppointment: boolean;
+}
+
+interface UpdateAppointmentPayload {
+    id: string;
+    input: UpdateAppointmentInput;
 }

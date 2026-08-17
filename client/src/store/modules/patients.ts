@@ -142,10 +142,7 @@ const actions: ActionTree<PatientsState, RootState> = {
 
     async updatePatient(
         { commit },
-        payload: {
-            id: string,
-            input: UpdatePatientInput
-        }
+        payload: UpdatePatientPayload
     ){
         commit("SET_LOADING", true)
         commit("SET_ERROR", null)
@@ -159,7 +156,11 @@ const actions: ActionTree<PatientsState, RootState> = {
                 }
             });
 
-            commit("SET_PATIENT", data?.updatePatient);
+            if (!data?.updatePatient){
+                return
+            }
+
+            commit("SET_PATIENT", data.updatePatient);
 
             console.log(
                 "Updated patient",

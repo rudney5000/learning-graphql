@@ -142,10 +142,7 @@ const actions: ActionTree<AppointmentsState, RootState> = {
 
     async updateAppointment(
         { commit },
-        payload: {
-            id: string,
-            input: UpdateAppointmentInput
-        }
+        payload: UpdateAppointmentPayload
     ){
         commit("SET_LOADING", true)
         commit("SET_ERROR", null)
@@ -159,7 +156,11 @@ const actions: ActionTree<AppointmentsState, RootState> = {
                 }
             });
 
-            commit("SET_APPOINTMENT", data?.updateAppointment);
+            if (!data?.updateAppointment){
+                return
+            }
+
+            commit("SET_APPOINTMENT", data.updateAppointment);
 
             console.log(
                 "Updated appointment",

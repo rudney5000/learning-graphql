@@ -1,243 +1,32 @@
 <script lang="ts">
 import Vue from "vue";
+import PatientList from "./components/patients/PatientList.vue";
+import PatientDetails from "./components/patients/PatientDetails.vue";
+import AppointmentDetails from "./components/appointments/AppointmentDetails.vue";
+import AppointmentList from "./components/appointments/AppointmentList.vue";
+import AuthPanel from "./components/auth/AuthPanel.vue";
 
 export default Vue.extend({
   name: "App",
 
-  data() {
-    return {};
-  },
-
-  computed: {
-
-    user(): User | null {
-      return this.$store.getters["auth/user"]
-    },
-
-    isAuthenticated(): boolean {
-      return this.$store.getters["auth/isAuthenticated"];
-    },
-
-    authLoading(): boolean {
-      return this.$store.getters["auth/loading"];
-    },
-
-    authError(): Error | null {
-      return this.$store.getters["auth/error"];
-    },
-
-    appointments(): Appointment[] {
-      return this.$store.getters["appointments/appointments"]
-    },
-
-    appointment(): Appointment | null{
-      return this.$store.getters["appointments/appointment"]
-    },
-
-    patients(): Patient[] {
-      return this.$store.getters["patients/patients"];
-    },
-
-    patient(): Patient | null {
-      return this.$store.getters["patients/patient"];
-    },
-
-    loading(): boolean {
-      return this.$store.getters["patients/loading"];
-    },
-
-    error(): Error | null {
-      return this.$store.getters["patients/error"];
-    },
-
-    appointmentsLoading(): boolean {
-      return this.$store.getters["appointments/loading"];
-    },
-
-    appointmentsError(): Error | null {
-      return this.$store.getters["appointments/error"];
-    },
-  },
-
-  async mounted() {
-    await this.$store.dispatch("auth/me");
-
-    if(!this.isAuthenticated) {
-      return;
-    }
-    await this.$store.dispatch("patients/getPatients")
-    await this.$store.dispatch("patients/getPatient", "2")
-    await this.$store.dispatch("appointments/getAppointment", "a2")
-    await this.$store.dispatch("appointments/getAppointments")
-  },
-
-  methods: {
-    createPatient() {
-      return this.$store.dispatch("patients/createPatient", {
-        firstName: "Paul",
-        lastName: "Doe",
-      })
-    },
-
-    updatePatient() {
-      if(!this.patient) {
-        return
-      }
-      return this.$store.dispatch("patients/updatePatient", {
-        id: this.patient.id,
-        input: {
-          firstName: "Aline Updated",
-        }
-      })
-    },
-
-    deletePatient() {
-      return this.$store.dispatch("patients/deletePatient", "1")
-    },
-
-    createAppointment() {
-      return this.$store.dispatch("appointments/createAppointment", {
-        patientId: "2",
-        scheduledAt: new Date().toISOString(),
-        reason: "Consultation"
-      })
-    },
-    updateAppointment() {
-      if(!this.appointment) {
-        return
-      }
-
-      return this.$store.dispatch("appointments/updateAppointment", {
-        id: this.appointment.id,
-        input: {
-          reason: "Consultation Updated",
-        }
-      })
-    },
-    deleteAppointment() {
-      if(!this.appointment) {
-        return
-      }
-      return this.$store.dispatch("appointments/deleteAppointment", this.appointment.id);
-    },
-
-    logout() {
-      return this.$store.dispatch("auth/logout")
-    }
+  components: {
+    AuthPanel,
+    PatientList,
+    PatientDetails,
+    AppointmentList,
+    AppointmentDetails,
   },
 });
 
 </script>
 
 <template>
-  <div>
-
-    <div v-if="isAuthenticated && user">
-      <p>
-        Connected user: {{ user.id }}
-      </p>
-      <p>
-        Role: {{ user.role }}
-      </p>
-      <button @click="logout">
-        Logout
-      </button>
-    </div>
-
-    <p>Vue 2 + Vuex 3</p>
-
-    <h1>Patients</h1>
-
-    <p v-if="loading">Loading ...</p>
-
-    <p v-else-if="error">
-      Error: {{ error.message }}
-    </p>
-
-    <ul v-else>
-      <li
-          v-for="patient in patients"
-          :key="patient.id"
-      >
-        {{ patient.firstName }}
-        {{ patient.lastName }}
-      </li>
-    </ul>
-
-    <button @click="createPatient">
-      Create patient
-    </button>
-
-    <h1>Patient</h1>
-    <div v-if="loading">
-      ...Loading
-    </div>
-    <div v-else-if="error">
-      Error: {{ error.message }}
-    </div>
-    <div v-else-if="patient">
-      <p>ID: {{ patient.id }} </p>
-      <p>First name: {{ patient.firstName }} </p>
-      <p>Last name: {{ patient.lastName }} </p>
-
-      <h2>Appointments</h2>
-      <ul v-if="patient.appointments?.length">
-        <li
-            v-for="appointment in patient.appointments"
-            :key="appointment.id"
-        >
-          <strong>{{ appointment.reason }}</strong>
-          -
-          {{ appointment.scheduledAt }}
-        </li>
-      </ul>
-      <p v-else>
-        No appointments
-      </p>
-    </div>
-
-    <button
-        v-if="patient"
-        @click="updatePatient"
-    >
-      Update patient
-    </button>
-
-    <button
-        v-if="patient"
-        @click="deletePatient"
-    >
-      Delete Patient
-    </button>
-
-    <h1> Appointments </h1>
-    <div v-if="appointmentsLoading">
-      Loading appointments ...
-    </div>
-    <div v-else-if="appointmentsError">
-      Error: {{ appointmentsError.message }}
-    </div>
-    <ul v-else>
-      <li
-          v-for="appointment in appointments"
-          :key="appointment.id"
-      >
-        <strong>{{ appointment.reason }}</strong>
-        -
-        {{ appointment.scheduledAt }}
-        -
-        Patient ID: {{ appointment.patientId }}
-      </li>
-    </ul>
-
-    <button @click="createAppointment">
-      Create Appointment
-    </button>
-    <button v-if="appointment" @click="updateAppointment">
-      Update Appointment
-    </button>
-    <button v-if="appointment" @click="deleteAppointment">
-      Delete Appointment
-    </button>
-  </div>
+  <section>
+    <AuthPanel />
+    <p>Vue 2 + Vue 3</p>
+    <PatientList />
+    <PatientDetails />
+    <AppointmentList/>
+    <AppointmentDetails />
+  </section>
 </template>
