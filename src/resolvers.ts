@@ -1,25 +1,46 @@
-import type { Appointment, GraphQLContext, Patient } from "./types";
-import {requireRole} from "./auth";
+import jwt from "jsonwebtoken";
+import type {
+    Appointment,
+    GraphQLContext,
+    Patient
+} from "./types";
+import {
+    JWT_SECRET,
+    requireRole
+} from "./auth";
 
 const fakePatients: Patient[] = [
     { id: "1", firstName: "Jean", "lastName": "Mbala"},
     { id: "2", firstName: "Aline", "lastName": "Kanku"}
-];
+]
 
 const fakeAppointments: Appointment[] = [
     { id: "a1", patientId: "1", scheduledAt: '2026-08-10T09:00:00Z', reason: 'Controle'},
     { id: "a2", patientId: "2", scheduledAt: '2026-09-01T14:00:00Z', reason: 'Suivi'},
     { id: "a3", patientId: "2", scheduledAt: '2026-08-15T10:00:00Z', reason: 'Vaccin'}
-];
+]
 
+const fakeUsers = [
+    {
+        id: "user-1",
+        username: "doctor",
+        password: "1234",
+        role: "DOCTOR",
+    }
+]
+
+interface LoginArgs {
+    username: string;
+    password: string;
+}
 
 interface PatientArgs {
     id: string;
-};
+}
 
 interface AppointmentArgs {
     id: string;
-};
+}
 
 interface CreatePatientArgs {
     input: {
@@ -53,8 +74,8 @@ interface UpdateAppointmentArgs {
     }
 }
 
-let nextPatientId = 3;
-let nextAppointmentId = 4;
+let nextPatientId = 3
+let nextAppointmentId = 4
 
 export const resolvers = {
     Query: {
@@ -93,6 +114,40 @@ export const resolvers = {
     },
 
     Mutation: {
+        login: (
+            _parent: unknown,
+            args: LoginArgs,
+        ) => {
+            const user = fakeUsers.find(
+                (user) =>
+                    user.username === args.username &&
+                    user.password === args.password
+            );
+
+            if (!user) {
+                throw new Error("Invalid credentials.");
+            }
+
+            const token = jwt.sign(
+                {
+                    sub: user.id,
+                    role: user.role,
+                },
+                JWT_SECRET,
+                {
+                    expiresIn: "1n"
+                }
+            );
+
+            return {
+                token,
+                user: {
+                    id: user.id,
+                    role: user.role,
+                }
+            }
+        },
+
         createPatient: (_patient: unknown, args: CreatePatientArgs): Patient => {
             const newPatient: Patient = {
                 id: String(nextPatientId++),
@@ -102,6 +157,7 @@ export const resolvers = {
             fakePatients.push(newPatient);
             return newPatient;
         },
+
         updatePatient: (_patient: unknown, args: UpdatePatientArgs): Patient | null => {
             const patient = fakePatients.find((p) => p.id === args.id);
             
@@ -112,12 +168,14 @@ export const resolvers = {
 
             return patient;
         },
+
         deletePatient: (_parent: unknown, args: PatientArgs): boolean => { 
             const index = fakePatients.findIndex((p) => p.id === args.id)
             if(index === -1) return false
             fakePatients.splice(index, 1);
             return true;
         },
+
         createAppointment: (_appointment: unknown, args: CreateAppointmentArgs): Appointment => {
             const newAppointment: Appointment = {
                 id: `a${nextAppointmentId++}`,
@@ -129,6 +187,7 @@ export const resolvers = {
             fakeAppointments.push(newAppointment);
             return newAppointment;
         },
+
         updateAppointment: (_patient: unknown, args: UpdateAppointmentArgs): Appointment | null => {
             const appointment = fakeAppointments.find((appointment) => appointment.id === args.id);
 
@@ -140,6 +199,7 @@ export const resolvers = {
 
             return appointment;
         },
+
         deleteAppointment: (_parent: unknown, args: AppointmentArgs): boolean => {
             const index = fakeAppointments.findIndex((appointment) => appointment.id === args.id);
             if(index === -1) return false
@@ -147,6 +207,7 @@ export const resolvers = {
             return true;
         }
     },
+
     Patient: {
         appointments: (patient: Patient): Appointment[] => {
             return fakeAppointments.filter((a) => a.patientId === patient.id)
