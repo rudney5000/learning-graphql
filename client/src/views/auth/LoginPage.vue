@@ -1,6 +1,6 @@
 <script lang="ts">
 import Vue from 'vue'
-import LoginForm from "../components/auth/LoginForm.vue";
+import LoginForm from "../../components/auth/LoginForm.vue";
 
 export default Vue.extend({
   name: "LoginView",

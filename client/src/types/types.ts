@@ -2,9 +2,11 @@ export interface MeData {
     me: User | null;
 }
 
+export type UserRole = "DOCTOR" | "PATIENT" | "ADMIN"
+
 export interface User {
     id: string;
-    role: string;
+    role: UserRole;
 }
 
 export interface LoginInput {
