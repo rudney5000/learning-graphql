@@ -1,3 +1,5 @@
+import {ApiErrorType} from "../apollo/errors.ts";
+
 export interface MeData {
     me: User | null;
 }
@@ -109,4 +111,9 @@ export interface DeleteAppointmentData {
 export interface UpdateAppointmentPayload {
     id: string;
     input: UpdateAppointmentInput;
+}
+
+export interface ApiError {
+    type: ApiErrorType;
+    message: string;
 }

@@ -1,10 +1,11 @@
 import {
     ApolloClient,
     InMemoryCache,
-    createHttpLink
+    createHttpLink,
+    from
 } from "@apollo/client";
 import {setContext} from "@apollo/client/link/context";
-
+import {errorLink} from "./errorLink";
 
 const authLink = setContext((_, { headers }) => {
     const token = localStorage.getItem("access_token")
@@ -24,6 +25,10 @@ const httpLink = createHttpLink({
 });
 
 export const apolloClient = new ApolloClient({
-    link: authLink.concat(httpLink),
+    link: from([
+        errorLink,
+        authLink,
+        httpLink
+    ]),
     cache: new InMemoryCache(),
 });

@@ -26,7 +26,7 @@ const fakeUsers = [
         id: "user-1",
         username: "doctor",
         password: "1234",
-        role: "DOCTOR",
+        role: "NURSE",
     }
 ]
 
@@ -144,7 +144,7 @@ export const resolvers = {
                 },
                 JWT_SECRET,
                 {
-                    expiresIn: "1n"
+                    expiresIn: "10s"
                 }
             );
 

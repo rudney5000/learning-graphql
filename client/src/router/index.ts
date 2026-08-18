@@ -6,7 +6,7 @@ import AppLayout from "../layouts/AppLayout.vue";
 import PatientsPage from "../views/patients/PatientsPage.vue";
 import AppointmentsPage from "../views/appointments/AppointmentsPage.vue";
 import AuthLayout from "../layouts/AuthLayout.vue";
-import {User} from "../types/types.ts";
+import {User} from "../types/types";
 import ForbiddenPage from "../views/ForbiddenPage.vue";
 
 Vue.use(VueRouter)
@@ -80,6 +80,7 @@ router.beforeEach(async (to: Route, _from: Route, next) => {
     if(requiresAuth && !isAuthenticated){
         next({
             name: "login",
+            query: { redirect: to.fullPath },
         })
         return
     }

@@ -3,7 +3,7 @@ import Vue from 'vue'
 import LoginForm from "../../components/auth/LoginForm.vue";
 
 export default Vue.extend({
-  name: "LoginView",
+  name: "LoginPage",
   components: {LoginForm}
 })
 </script>

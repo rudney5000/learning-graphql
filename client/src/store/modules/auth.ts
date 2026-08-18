@@ -77,17 +77,23 @@ const actions: ActionTree<AuthState, RootState> = {
         { commit },
         input: LoginInput
     ){
+        console.log("LOGIN ACTION START", input);
+
         commit("SET_LOADING", true)
         commit("SET_ERROR", null)
 
         try {
-            console.log("LOGIN INPUT:", input);
+            console.log("BEFORE APOLLO LOGIN");
             const { data } = await apolloClient.mutate<LoginData>({
                 mutation: LOGIN,
                 variables: input,
             });
 
+            console.log("AFTER APOLLO LOGIN");
+            console.log("LOGIN DATA:", data);
+
             if (!data) {
+                console.log("NO LOGIN DATA");
                 return
             }
 
