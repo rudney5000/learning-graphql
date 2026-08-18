@@ -1,49 +1,59 @@
 import Vue from "vue";
-import VueRouter, {Route} from "vue-router";
+import VueRouter, {Route, RouteConfig} from "vue-router";
 import LoginView from "../views/LoginView.vue";
 import DashboardView from "../views/DashboardView.vue";
+import store from "../store";
 
 Vue.use(VueRouter)
 
+const routes: RouteConfig[] = [
+    {
+        path: '/login',
+        name: 'login',
+        component: LoginView,
+        meta: {
+            public: true,
+        }
+    },
+    {
+        path: '/patients',
+        name: 'patients',
+        component: DashboardView,
+        meta: {
+            requiresAuth: true,
+        }
+    },
+    {
+        path: "*",
+        redirect: '/patients'
+    }
+]
 const router = new VueRouter({
     mode: 'history',
-    routes: [
-        {
-            path: '/login',
-            name: 'login',
-            component: LoginView,
-            meta: {
-                guestOnly: true,
-            }
-        },
-        {
-            path: '/dashboard',
-            name: 'dashboard',
-            component: DashboardView,
-            meta: {
-                requiresAuth: true,
-            }
-        },
-        {
-            path: "*",
-            redirect: '/dashboard'
-        }
-    ]
+    routes
 })
 
-router.beforeEach((to: Route, _from: Route, next) => {
+router.beforeEach(async (to: Route, _from: Route, next) => {
     const token = localStorage.getItem('access_token');
 
-    if(to.matched.some((record) => record.meta?.requiresAuth) && !token){
+    const initialized = store.getters["auth/initialized"];
+
+    if (!initialized) {
+        await store.dispatch("auth/me")
+    }
+
+    const isAuthenticated = store.getters["auth/isAuthenticated"];
+
+    if(to.meta?.requiresAuth && !isAuthenticated){
         next({
             name: "login",
         })
         return
     }
 
-    if(to.matched.some((record) => record.meta?.guestOnly) && token){
+    if(to.name === "login" && isAuthenticated){
         next({
-            name: "dashboard",
+            name: "patients",
         })
         return
     }

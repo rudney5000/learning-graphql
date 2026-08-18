@@ -27,6 +27,7 @@ interface AuthState {
     user: User | null;
     loading: boolean;
     error: Error | null;
+    initialized: boolean;
 }
 
 const state: AuthState = {
@@ -34,6 +35,7 @@ const state: AuthState = {
     user: null,
     loading: false,
     error: null,
+    initialized: false
 }
 
 const mutations: MutationTree<AuthState> = {
@@ -63,6 +65,10 @@ const mutations: MutationTree<AuthState> = {
     LOGOUT(state) {
         state.token = null
         state.user = null
+    },
+
+    SET_INITIALIZED(state, initialized: boolean) {
+        state.initialized = initialized
     }
 }
 
@@ -98,14 +104,15 @@ const actions: ActionTree<AuthState, RootState> = {
         commit("SET_ERROR", null)
 
         try {
+            const token = localStorage.getItem("access_token");
+
             const { data } = await apolloClient.query<MeData>({
                 query: ME,
                 fetchPolicy: "network-only"
             })
 
-            const token = localStorage.getItem("access_token");
-
-            if (!data || !token || !data.me) {
+            if (!data?.me) {
+                localStorage.getItem("access_token");
                 commit("LOGOUT")
                 return
             }
@@ -122,6 +129,7 @@ const actions: ActionTree<AuthState, RootState> = {
             commit("SET_ERROR", error as Error)
 
         } finally {
+            commit("SET_INITIALIZED", true)
             commit("SET_LOADING", false)
         }
     },
@@ -141,7 +149,8 @@ const getters: GetterTree<AuthState, RootState> = {
 
     isAuthenticated: (state) => {
         return !!state.token;
-    }
+    },
+    initialized: (state) => state.initialized
 }
 
 export default {

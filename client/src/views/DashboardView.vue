@@ -21,9 +21,10 @@ export default Vue.extend({
 <template>
   <section>
     <AuthPanel />
-    <p>Dashboard</p>
+    <p>Patients</p>
     <PatientList />
     <PatientDetails />
+    <h1>Appointments</h1>
     <AppointmentList/>
     <AppointmentDetails />
   </section>

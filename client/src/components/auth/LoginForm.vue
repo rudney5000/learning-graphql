@@ -30,7 +30,7 @@ export default defineComponent({
 
       if(isAuthenticated) {
         await this.$router.push({
-          name: "dashboard",
+          name: "patients",
         });
       }
     }
