@@ -22,15 +22,13 @@ export default Vue.extend({
 
   async mounted() {
     await this.$store.dispatch("auth/me");
-
-    if(!this.isAuthenticated) {
-      return;
-    }
   },
 
   methods: {
-    logout() {
-      return this.$store.dispatch("auth/logout")
+    async logout() {
+      await this.$store.dispatch("auth/logout")
+
+      await this.$router.push({name: "login"});
     }
   },
 })

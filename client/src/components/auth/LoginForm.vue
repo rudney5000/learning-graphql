@@ -26,6 +26,13 @@ export default defineComponent({
         username: this.username,
         password: this.password,
       });
+      const isAuthenticated = this.$store.getters["auth/isAuthenticated"];
+
+      if(isAuthenticated) {
+        await this.$router.push({
+          name: "dashboard",
+        });
+      }
     }
   }
 })

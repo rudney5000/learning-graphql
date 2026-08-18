@@ -99,18 +99,28 @@ const actions: ActionTree<AuthState, RootState> = {
 
         try {
             const { data } = await apolloClient.query<MeData>({
-                query: ME
+                query: ME,
+                fetchPolicy: "network-only"
             })
-            if (!data) {
+
+            const token = localStorage.getItem("access_token");
+
+            if (!data || !token || !data.me) {
+                commit("LOGOUT")
                 return
             }
 
             commit("SET_AUTH", {
-                token: localStorage.getItem("access_token")!,
+                token,
                 user: data.me
             })
+
         } catch (error) {
+            localStorage.removeItem("access_token")
+
+            commit("LOGOUT")
             commit("SET_ERROR", error as Error)
+
         } finally {
             commit("SET_LOADING", false)
         }
