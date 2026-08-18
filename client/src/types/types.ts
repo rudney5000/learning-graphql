@@ -1,4 +1,4 @@
-interface MeData {
+export interface MeData {
     me: User | null;
 }
 
@@ -7,104 +7,104 @@ export interface User {
     role: string;
 }
 
-interface LoginInput {
+export interface LoginInput {
     username: string;
     password: string;
 }
 
-interface LoginData {
+export interface LoginData {
     login: {
         token: string;
         user: User;
     }
 }
 
-interface Patient {
+export interface Patient {
     id: string;
     firstName: string;
     lastName: string;
     appointments?: Appointment[];
 }
 
-interface GetPatientsData {
+export interface GetPatientsData {
     patients: Patient[];
 }
 
-interface GetPatientData {
+export interface GetPatientData {
     patient: Patient | null;
 }
 
-interface CreatePatientInput {
+export interface CreatePatientInput {
     firstName: string;
     lastName: string;
 }
 
-interface CreatePatientData {
+export interface CreatePatientData {
     createPatient: Patient;
 }
 
-interface UpdatePatientData {
+export interface UpdatePatientData {
     updatePatient: Patient;
 }
 
-interface UpdatePatientInput {
+export interface UpdatePatientInput {
     firstName?: string;
     lastName?: string;
 }
 
-interface DeletePatientData {
+export interface DeletePatientData {
     deletePatient: boolean;
 }
 
-interface UpdatePatientPayload {
+export interface UpdatePatientPayload {
     id: string;
     input: UpdatePatientInput;
 }
 
-interface Appointment {
+export interface Appointment {
     id: string;
     patientId: string;
     scheduledAt: string;
     reason: string;
 }
 
-interface GetAppointmentsData {
+export interface GetAppointmentsData {
     appointments: Appointment[];
 }
 
-interface GetAppointmentData {
+export interface GetAppointmentData {
     appointment: Appointment | null;
 }
 
-interface CreateAppointmentInput {
+export interface CreateAppointmentInput {
     patientId: string;
     scheduledAt: string;
     reason: string;
 }
 
-interface CreateAppointmentData {
+export interface CreateAppointmentData {
     createAppointment: Appointment;
 }
 
-interface UpdateAppointmentData {
+export interface UpdateAppointmentData {
     updateAppointment: Appointment;
 }
 
-interface UpdateAppointmentInput {
+export interface UpdateAppointmentInput {
     patientId?: string;
     scheduledAt?: string;
     reason?: string;
 }
 
-interface DeleteAppointmentInput {
+export interface DeleteAppointmentInput {
     id: string;
 }
 
-interface DeleteAppointmentData {
+export interface DeleteAppointmentData {
     deleteAppointment: boolean;
 }
 
-interface UpdateAppointmentPayload {
+export interface UpdateAppointmentPayload {
     id: string;
     input: UpdateAppointmentInput;
 }

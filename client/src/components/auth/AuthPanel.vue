@@ -1,26 +1,22 @@
 <script lang="ts">
 import Vue from 'vue'
-import {User} from "../../types/types.ts";
+import {User} from "../../types/types";
+import LoginForm from "./LoginForm.vue";
 
 export default Vue.extend({
   name: "AuthPanel",
 
-  computed: {
+  components: {
+    LoginForm
+  },
 
+  computed: {
     user(): User | null {
       return this.$store.getters["auth/user"]
     },
 
     isAuthenticated(): boolean {
       return this.$store.getters["auth/isAuthenticated"];
-    },
-
-    authLoading(): boolean {
-      return this.$store.getters["auth/loading"];
-    },
-
-    authError(): Error | null {
-      return this.$store.getters["auth/error"];
     },
   },
 
@@ -42,7 +38,8 @@ export default Vue.extend({
 
 <template>
   <section>
-    <div v-if="isAuthenticated && user">
+    <LoginForm v-if="isAuthenticated && user"/>
+    <div v-else-if="user">
       <p>
         Connected user: {{ user.id }}
       </p>

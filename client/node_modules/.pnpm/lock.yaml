@@ -20,6 +20,9 @@ importers:
       vue:
         specifier: ^2.7.16
         version: 2.7.16
+      vue-router:
+        specifier: ^3.6.5
+        version: 3.6.5(vue@2.7.16)
       vuex:
         specifier: ^3.6.2
         version: 3.6.2(vue@2.7.16)
@@ -573,6 +576,11 @@ packages:
       yaml:
         optional: true
 
+  vue-router@3.6.5:
+    resolution: {integrity: sha512-VYXZQLtjuvKxxcshuRAwjHnciqZVoXAjTjcqBTz4rKc8qih9g9pI3hbDjmqXaHdgL3v8pV6P8Z335XvHzESxLQ==}
+    peerDependencies:
+      vue: ^2
+
   vue-template-compiler@2.7.16:
     resolution: {integrity: sha512-AYbUWAJHLGGQM7+cNTELw+KsOG9nl2CnSv467WobS5Cv9uk3wFcnr1Etsz2sEIHEZvw1U+o9mRlEO6QbZvUPGQ==}
 
@@ -938,6 +946,10 @@ snapshots:
     optionalDependencies:
       esbuild: 0.28.2
       fsevents: 2.3.3
+
+  vue-router@3.6.5(vue@2.7.16):
+    dependencies:
+      vue: 2.7.16
 
   vue-template-compiler@2.7.16:
     dependencies:

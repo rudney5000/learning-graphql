@@ -12,7 +12,15 @@ import {
 import {
     LOGIN
 } from "../../graphql/auth/mutations/login";
-import {ME} from "../../graphql/auth/queries/me.ts";
+import {
+    ME
+} from "../../graphql/auth/queries/me";
+import {
+    LoginData,
+    LoginInput,
+    MeData,
+    User
+} from "../../types/types";
 
 interface AuthState {
     token: string | null;
@@ -67,6 +75,7 @@ const actions: ActionTree<AuthState, RootState> = {
         commit("SET_ERROR", null)
 
         try {
+            console.log("LOGIN INPUT:", input);
             const { data } = await apolloClient.mutate<LoginData>({
                 mutation: LOGIN,
                 variables: input,

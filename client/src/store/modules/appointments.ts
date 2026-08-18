@@ -27,6 +27,16 @@ import {
 import {
     RootState
 } from "../index";
+import {
+    Appointment,
+    CreateAppointmentData,
+    CreateAppointmentInput,
+    DeleteAppointmentData,
+    GetAppointmentData,
+    GetAppointmentsData,
+    UpdateAppointmentData,
+    UpdateAppointmentPayload
+} from "../../types/types";
 
 export interface AppointmentsState {
     appointments: Appointment[];
