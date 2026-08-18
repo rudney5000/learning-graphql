@@ -1,5 +1,6 @@
 <script lang="ts">
 import Vue from 'vue'
+import {Patient} from "../../types/types";
 
 export default Vue.extend({
   name: "PatientList",
@@ -23,12 +24,16 @@ export default Vue.extend({
   },
 
   methods: {
-    createPatient() {
-      return this.$store.dispatch("patients/createPatient", {
-        firstName: "Paul",
-        lastName: "Doe",
-      })
-    }
+
+    async selectPatient(id: string) {
+      await this.$store.dispatch("patients/getPatient", id)
+    },
+    async deletePatient(id: string) {
+      await this.$store.dispatch("patients/deletePatient", id)
+
+      await this.$store.dispatch("patients/getPatients")
+    },
+
   },
 
 })
@@ -39,7 +44,7 @@ export default Vue.extend({
     <h1>Patients</h1>
 
     <p v-if="loading">
-      Loading ...
+      Loading patients...
     </p>
 
     <p v-else-if="error">
@@ -51,14 +56,19 @@ export default Vue.extend({
           v-for="patient in patients"
           :key="patient.id"
       >
-        {{ patient.firstName }}
-        {{ patient.lastName }}
+        <span>
+          {{ patient.firstName }}
+          {{ patient.lastName }}
+        </span>
+
+        <button @click="selectPatient(patient.id)">
+          View
+        </button>
+        <button @click="deletePatient(patient.id)">
+          Delete
+        </button>
       </li>
     </ul>
-
-    <button @click="createPatient">
-      Create patient
-    </button>
   </section>
 </template>
 

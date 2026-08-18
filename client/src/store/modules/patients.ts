@@ -27,6 +27,16 @@ import {
 import {
     RootState
 } from "../index";
+import {
+    CreatePatientData,
+    CreatePatientInput,
+    DeletePatientData,
+    GetPatientData,
+    GetPatientsData,
+    Patient,
+    UpdatePatientData,
+    UpdatePatientPayload
+} from "../../types/types";
 
 export interface PatientsState {
     patients: Patient[];
@@ -57,6 +67,12 @@ const mutations: MutationTree<PatientsState> = {
 
     SET_PATIENT(state, patient: Patient | null) {
         state.patient = patient
+    },
+
+    REMOVE_PATIENT(state, id: string) {
+        state.patients = state.patients.filter(
+            patient => patient.id !== id
+        )
     }
 }
 
@@ -64,12 +80,10 @@ const actions: ActionTree<PatientsState, RootState> = {
     async getPatients({ commit }) {
         commit("SET_LOADING", true)
         commit("SET_ERROR", null)
-
         try {
             const result = await apolloClient.query<GetPatientsData>({
                 query: GET_PATIENTS,
             });
-
             if(!result.data) return
             commit("SET_PATIENTS", result.data.patients)
         } catch (e) {
@@ -82,7 +96,6 @@ const actions: ActionTree<PatientsState, RootState> = {
     async getPatient({ commit }, id: string) {
         commit("SET_LOADING", true)
         commit("SET_ERROR", null)
-
         try {
             const { data } = await apolloClient.query<GetPatientData>({
                 query: GET_PATIENT,
@@ -90,9 +103,7 @@ const actions: ActionTree<PatientsState, RootState> = {
                     id
                 }
             });
-
             if(!data) return
-
             commit("SET_PATIENT", data.patient)
         } catch (e) {
             commit("SET_ERROR", e as Error)
@@ -132,7 +143,6 @@ const actions: ActionTree<PatientsState, RootState> = {
                     })
                 }
             })
-            console.log("Created patient:", data?.createPatient);
         } catch (error) {
             commit("SET_ERROR", error as Error)
         } finally {
@@ -146,7 +156,6 @@ const actions: ActionTree<PatientsState, RootState> = {
     ){
         commit("SET_LOADING", true)
         commit("SET_ERROR", null)
-
         try {
             const { data } = await apolloClient.mutate<UpdatePatientData>({
                 mutation: UPDATE_PATIENT,
@@ -155,17 +164,10 @@ const actions: ActionTree<PatientsState, RootState> = {
                     input: payload.input
                 }
             });
-
             if (!data?.updatePatient){
                 return
             }
-
             commit("SET_PATIENT", data.updatePatient);
-
-            console.log(
-                "Updated patient",
-                data?.updatePatient
-            )
         } catch (error) {
             commit("SET_ERROR", error as Error)
         } finally {
@@ -176,14 +178,12 @@ const actions: ActionTree<PatientsState, RootState> = {
     async deletePatient({ commit }, id: string) {
         commit("SET_LOADING", true)
         commit("SET_ERROR", null)
-
         try {
             const { data } = await apolloClient.mutate<DeletePatientData>({
                 mutation: DELETE_PATIENT,
                 variables: {
                     id
                 },
-
                 update(cache) {
                     cache.evict({
                         id: cache.identify({
@@ -194,9 +194,8 @@ const actions: ActionTree<PatientsState, RootState> = {
                     cache.gc()
                 }
             });
-
-            console.log("Deleted patient:", data?.deletePatient);
             if(data?.deletePatient) {
+                commit("REMOVE_PATIENT", id)
                 commit("SET_PATIENT", null)
             }
         } catch (error) {
@@ -205,7 +204,6 @@ const actions: ActionTree<PatientsState, RootState> = {
             commit("SET_LOADING", false)
         }
     }
-
 }
 
 const getters: GetterTree<PatientsState, RootState> = {

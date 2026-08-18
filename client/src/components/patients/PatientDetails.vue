@@ -1,5 +1,6 @@
 <script lang="ts">
 import Vue from 'vue'
+import {Patient} from "../../types/types";
 
 export default Vue.extend({
   name: "PatientDetails",
@@ -15,29 +16,6 @@ export default Vue.extend({
 
     error(): Error | null {
       return this.$store.getters["patients/error"];
-    },
-  },
-
-  async mounted() {
-    await this.$store.dispatch("patients/getPatient", "2")
-  },
-
-  methods: {
-
-    updatePatient() {
-      if(!this.patient) {
-        return
-      }
-      return this.$store.dispatch("patients/updatePatient", {
-        id: this.patient.id,
-        input: {
-          firstName: "Aline Updated",
-        }
-      })
-    },
-
-    deletePatient() {
-      return this.$store.dispatch("patients/deletePatient", "1")
     },
   },
 })
@@ -80,19 +58,15 @@ export default Vue.extend({
         No appointments
       </p>
     </div>
+    <p v-else>
+      Select a patient
+    </p>
 
     <button
         v-if="patient"
-        @click="updatePatient"
+        @click="$emit('edit')"
     >
-      Update patient
-    </button>
-
-    <button
-        v-if="patient"
-        @click="deletePatient"
-    >
-      Delete Patient
+      Edit Patient
     </button>
   </section>
 </template>
