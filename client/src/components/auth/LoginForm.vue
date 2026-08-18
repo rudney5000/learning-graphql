@@ -22,25 +22,29 @@ export default defineComponent({
 
   methods: {
     async login() {
-      console.log("LOGIN START");
+
       await this.$store.dispatch("auth/login", {
         username: this.username,
         password: this.password,
       });
-      const isAuthenticated = this.$store.getters["auth/isAuthenticated"];
 
-      if(isAuthenticated) {
-        const redirect = this.$route.query.redirect;
+      const isAuthenticated =
+          this.$store.getters["auth/isAuthenticated"];
 
-        if(typeof redirect === "string") {
-          await this.$router.push(redirect)
-          return
-        }
-
-        await this.$router.push({
-          name: "patients",
-        });
+      if (!isAuthenticated) {
+        return;
       }
+
+      const redirect = this.$route.query.redirect;
+
+      if (typeof redirect === "string") {
+        await this.$router.push(redirect);
+        return;
+      }
+
+      await this.$router.push({
+        name: "patients",
+      });
     }
   }
 })

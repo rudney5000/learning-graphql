@@ -77,27 +77,27 @@ const actions: ActionTree<AuthState, RootState> = {
         { commit },
         input: LoginInput
     ){
-        console.log("LOGIN ACTION START", input);
-
         commit("SET_LOADING", true)
         commit("SET_ERROR", null)
 
         try {
-            console.log("BEFORE APOLLO LOGIN");
             const { data } = await apolloClient.mutate<LoginData>({
                 mutation: LOGIN,
                 variables: input,
             });
 
-            console.log("AFTER APOLLO LOGIN");
-            console.log("LOGIN DATA:", data);
-
             if (!data) {
-                console.log("NO LOGIN DATA");
                 return
             }
 
-            commit("SET_USER", data.me)
+            const { token, user } = data.login
+            localStorage.setItem("access_token", token)
+            commit("SET_AUTH", {
+                token,
+                user
+            })
+
+            commit("SET_INITIALIZED", true)
         } catch (error) {
             commit("SET_ERROR", error as Error)
         } finally {
@@ -123,17 +123,12 @@ const actions: ActionTree<AuthState, RootState> = {
                 return
             }
 
-            commit("SET_AUTH", {
-                token,
-                user: data.me
-            })
-
+            commit("SET_USER",  data.me)
         } catch (error) {
             localStorage.removeItem("access_token")
 
             commit("LOGOUT")
             commit("SET_ERROR", error as Error)
-
         } finally {
             commit("SET_INITIALIZED", true)
             commit("SET_LOADING", false)
@@ -142,7 +137,6 @@ const actions: ActionTree<AuthState, RootState> = {
 
     logout({ commit }) {
         localStorage.removeItem("access_token");
-
         commit("LOGOUT");
     }
 }

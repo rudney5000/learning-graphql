@@ -26,7 +26,7 @@ const fakeUsers = [
         id: "user-1",
         username: "doctor",
         password: "1234",
-        role: "NURSE",
+        role: "DOCTOR",
     }
 ]
 
