@@ -1,5 +1,6 @@
 <script lang="ts">
 import Vue from 'vue'
+import {Appointment} from "../../types/types";
 
 export default Vue.extend({
   name: "AppointmentDetails",
@@ -16,32 +17,6 @@ export default Vue.extend({
     error(): Error | null {
       return this.$store.getters["appointments/error"];
     },
-  },
-
-  async mounted() {
-    await this.$store.dispatch("appointments/getAppointment", "a2")
-  },
-
-  methods: {
-    updateAppointment() {
-      if(!this.appointment) {
-        return
-      }
-
-      return this.$store.dispatch("appointments/updateAppointment", {
-        id: this.appointment.id,
-        input: {
-          reason: "Consultation Updated",
-        }
-      })
-    },
-    deleteAppointment() {
-      if(!this.appointment) {
-        return
-      }
-      return this.$store.dispatch("appointments/deleteAppointment", this.appointment.id);
-    },
-
   },
 })
 </script>
@@ -77,15 +52,16 @@ export default Vue.extend({
         Scheduled at:
         {{ appointment.scheduledAt }}
       </p>
-
-      <button @click="updateAppointment">
-        Update Appointment
-      </button>
-
-      <button @click="deleteAppointment">
-        Delete Appointment
-      </button>
     </div>
+    <p v-else>
+      Select a appointment
+    </p>
+    <button
+        v-if="appointment"
+        @click="$emit('edit')"
+    >
+      Edit Appointment
+    </button>
   </section>
 </template>
 

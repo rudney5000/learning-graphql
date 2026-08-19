@@ -1,5 +1,6 @@
 <script lang="ts">
 import Vue  from 'vue'
+import {Appointment} from "../../types/types";
 
 export default Vue.extend({
   name: "AppointmentList",
@@ -23,13 +24,14 @@ export default Vue.extend({
   },
 
   methods: {
-    createAppointment() {
-      return this.$store.dispatch("appointments/createAppointment", {
-        patientId: "2",
-        scheduledAt: new Date().toISOString(),
-        reason: "Consultation"
-      })
+    async selectAppointment(id: string) {
+      await this.$store.dispatch("appointments/getAppointment", id)
     },
+    async deleteAppointment(id: string) {
+      await this.$store.dispatch("appointments/deleteAppointment", id)
+
+      await this.$store.dispatch("appointments/getAppointments")
+    }
 
   },
 })
@@ -54,12 +56,17 @@ export default Vue.extend({
         {{ appointment.scheduledAt }}
         -
         Patient ID: {{ appointment.patientId }}
+
+        <button @click="selectAppointment(appointment.id)">
+          View
+        </button>
+
+        <button @click="deleteAppointment(appointment.id)">
+          Delete
+        </button>
       </li>
     </ul>
 
-    <button @click="createAppointment">
-      Create Appointment
-    </button>
   </section>
 </template>
 

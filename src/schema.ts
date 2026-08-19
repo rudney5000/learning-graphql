@@ -50,9 +50,9 @@ export const typeDefs = `#graphql
     }
     
     input UpdateAppointmentInput {
-        patientId: ID!
-        scheduledAt: String!
-        reason: String!
+        patientId: ID
+        scheduledAt: String
+        reason: String
     }
 
     type Mutation {
