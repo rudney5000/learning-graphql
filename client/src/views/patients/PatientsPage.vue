@@ -16,6 +16,7 @@ export default Vue.extend({
   data() {
     return {
       showForm: false,
+      selectedPatientId: null as string | null,
     }
   },
 
@@ -40,6 +41,9 @@ export default Vue.extend({
 
     closeForm() {
       this.showForm = false;
+    },
+    selectPatient(id: string) {
+      this.selectedPatientId = id;
     }
   }
 })
@@ -52,8 +56,8 @@ export default Vue.extend({
     <button @click="openCreateForm">
       Create Patient
     </button>
-    <PatientList />
-    <PatientDetails @edit="openEditForm" />
+    <PatientList @select="selectPatient"/>
+    <PatientDetails :patient-id="selectedPatientId" @edit="openEditForm" />
 
     <div v-if="showForm">
       <PatientForm :patient="patient" @saved="closeForm"/>
