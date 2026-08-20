@@ -4,9 +4,6 @@ import {
     MutationTree
 } from "vuex";
 import {
-    RootState
-} from "../index";
-import {
     apolloClient
 } from "../../apollo/apollo";
 import {
@@ -21,6 +18,10 @@ import {
     MeData,
     User
 } from "../../types/types";
+
+export interface RootState {
+    auth: AuthState;
+}
 
 interface AuthState {
     token: string | null;
