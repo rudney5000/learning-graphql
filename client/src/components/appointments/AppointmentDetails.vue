@@ -1,23 +1,142 @@
 <script lang="ts">
 import Vue from 'vue'
-import {Appointment} from "../../types/types";
+import {
+  Appointment,
+  DeleteAppointmentData,
+  GetAppointmentData,
+  UpdateAppointmentData
+} from "../../types/types";
+import {ObservableQuery} from "@apollo/client";
+import {
+  apolloClient
+} from "../../apollo/apollo";
+import {
+  GET_APPOINTMENT
+} from "../../graphql/appointments/queries/getAppointment";
+import {
+  UPDATE_APPOINTMENT
+} from "../../graphql/appointments/mutations/updateAppointment";
+import {
+  DELETE_APPOINTMENT
+} from "../../graphql/appointments/mutations/deleteAppointment";
 
 export default Vue.extend({
   name: "AppointmentDetails",
 
-  computed: {
-    appointment(): Appointment | null{
-      return this.$store.getters["appointments/appointment"]
-    },
-
-    loading(): boolean {
-      return this.$store.getters["appointments/loading"];
-    },
-
-    error(): Error | null {
-      return this.$store.getters["appointments/error"];
-    },
+  data() {
+    return {
+      loading: false,
+      error: null as Error | null,
+      appointment: null as Appointment | null,
+      appointmentQuery: null as ObservableQuery<GetAppointmentData> | null,
+    }
   },
+
+  props: {
+    appointmentId: {
+      type: String,
+      default: null
+    }
+  },
+
+  watch: {
+    appointmentId: {
+      immediate: true,
+      handler(id: string | null) {
+        if(!id) {
+          this.appointment = null
+          return
+        }
+        this.watchAppointment(id)
+      }
+    }
+  },
+
+  beforeDestroy() {
+    this.appointmentQuery?.stopPolling()
+  },
+
+  methods: {
+    watchAppointment(id: string) {
+      this.appointmentQuery?.stopPolling()
+
+      this.loading = true
+      this.error = null
+
+      this.appointmentQuery = apolloClient.watchQuery<GetAppointmentData>({
+        query: GET_APPOINTMENT,
+        variables: {
+          id
+        },
+        fetchPolicy: "cache-and-network"
+      })
+
+      this.appointmentQuery?.subscribe({
+        next: ({ data, loading }) => {
+          this.loading = loading
+
+          if(data) {
+            this.appointment = data.appointment
+          }
+        },
+
+        error: (error) => {
+          this.error = error
+          this.loading = false
+        }
+      })
+    },
+
+    async updateAppointment() {
+      if(!this.appointment) {
+        return
+      }
+      this.error = null
+      try {
+        const { data } = await apolloClient.mutate<UpdateAppointmentData>({
+          mutation: UPDATE_APPOINTMENT,
+          variables: {
+            id: this.appointment.id,
+            input: {
+              reason: "Consultation Updated"
+            }
+          }
+        })
+
+        if (data?.updateAppointment) {
+          console.log("Updated appointment",data.updateAppointment)
+        }
+      } catch (error) {
+        this.error = error as Error
+      }
+    },
+
+    async deleteAppointment() {
+      if(!this.appointment) {
+        return
+      }
+
+      const id = this.appointment.id
+
+      await apolloClient.mutate<DeleteAppointmentData>({
+        mutation: DELETE_APPOINTMENT,
+        variables: {
+          id
+        },
+
+        update(cache) {
+          cache.evict({
+            id: cache.identify({
+              __typename: "Appointment",
+              id
+            })
+          })
+          cache.gc()
+        }
+      })
+      this.appointment = null
+    }
+  }
 })
 </script>
 
@@ -58,7 +177,7 @@ export default Vue.extend({
     </p>
     <button
         v-if="appointment"
-        @click="$emit('edit')"
+        @click="updateAppointment"
     >
       Edit Appointment
     </button>

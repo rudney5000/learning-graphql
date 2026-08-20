@@ -1,39 +1,92 @@
 <script lang="ts">
 import Vue  from 'vue'
-import {Appointment} from "../../types/types";
+import {
+  Appointment,
+  DeleteAppointmentData,
+  GetAppointmentsData
+} from "../../types/types";
+import {
+  ObservableQuery
+} from "@apollo/client";
+import {
+  apolloClient} from "../../apollo/apollo";
+import {
+  DELETE_APPOINTMENT
+} from "../../graphql/appointments/mutations/deleteAppointment";
+import {
+  GET_APPOINTMENTS
+} from "../../graphql/appointments/queries/getAppointments";
 
 export default Vue.extend({
   name: "AppointmentList",
 
-  computed: {
-    appointments(): Appointment[] {
-      return this.$store.getters["appointments/appointments"]
-    },
-
-    loading(): boolean {
-      return this.$store.getters["appointments/loading"];
-    },
-
-    error(): Error | null {
-      return this.$store.getters["appointments/error"];
-    },
+  data() {
+    return {
+      loading: false,
+      error: null as Error | null,
+      appointments: [] as Appointment[],
+      appointmentsQuery: null as ObservableQuery<GetAppointmentsData> | null
+    }
   },
 
-  async mounted() {
-    await this.$store.dispatch("appointments/getAppointments")
+  mounted() {
+    this.watchAppointments()
+  },
+
+  beforeDestroy() {
+    this.appointmentsQuery?.stopPolling()
   },
 
   methods: {
-    async selectAppointment(id: string) {
-      await this.$store.dispatch("appointments/getAppointment", id)
+    selectAppointment(id: string) {
+      this.$emit("select", id)
     },
     async deleteAppointment(id: string) {
-      await this.$store.dispatch("appointments/deleteAppointment", id)
+      try {
+        await apolloClient.mutate<DeleteAppointmentData>({
+          mutation: DELETE_APPOINTMENT,
+          variables: {
+            id
+          },
+          update(cache) {
+            cache.evict({
+              id: cache.identify({
+                __typename: "Appointment",
+                id
+              })
+            });
+            cache.gc()
+          }
+        })
+      } catch (error) {
+        this.error = error as Error;
+      }
+    },
 
-      await this.$store.dispatch("appointments/getAppointments")
+    watchAppointments() {
+      this.appointmentsQuery = apolloClient.watchQuery<GetAppointmentsData>({
+        query: GET_APPOINTMENTS,
+        fetchPolicy: "cache-and-network",
+        returnPartialData: false
+      })
+
+      this.appointmentsQuery.subscribe({
+        next: ({ data, loading }) => {
+          this.loading = loading
+
+          if (data?.appointments) {
+            this.appointments = data.appointments
+          }
+        },
+        error: (error) => {
+          this.error = error as Error;
+          this.loading = false;
+        }
+      })
     }
-
   },
+
+
 })
 </script>
 

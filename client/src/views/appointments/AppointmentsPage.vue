@@ -15,7 +15,9 @@ export default Vue.extend({
 
   data() {
     return {
-      showForm: false
+      showForm: false,
+      selectedAppointmentId: null as string | null,
+      selectedAppointment: null as Appointment | null,
     }
   },
 
@@ -40,6 +42,10 @@ export default Vue.extend({
 
     closeForm() {
       this.showForm = false;
+    },
+
+    selectAppointment(id: string) {
+      this.selectedAppointmentId = id;
     }
   }
 })
@@ -52,11 +58,11 @@ export default Vue.extend({
     <button @click="openCreateForm">
       Create Appointment
     </button>
-    <AppointmentList/>
-    <AppointmentDetails @edit="openEditForm"/>
+    <AppointmentList @select="selectAppointment"/>
+    <AppointmentDetails :appointment-id="selectedAppointmentId" @edit="openEditForm"/>
     <div v-if="showForm">
       <AppointmentForm
-          :appointment="appointment"
+          :appointment="selectedAppointment"
           @saved="closeForm"
       />
       <button @click="closeForm">

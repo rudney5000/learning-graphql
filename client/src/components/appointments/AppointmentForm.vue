@@ -2,8 +2,29 @@
 import Vue from 'vue'
 import {
   Appointment,
-  Patient
+  CreateAppointmentData,
+  GetPatientsData,
+  Patient,
+  UpdateAppointmentData
 } from "../../types/types";
+import {
+  apolloClient
+} from "../../apollo/apollo";
+import {
+  UPDATE_APPOINTMENT
+} from "../../graphql/appointments/mutations/updateAppointment";
+import {
+  APPOINTMENT_FIELDS
+} from "../../graphql/appointments/fragments/appointment";
+import {
+  ObservableQuery
+} from "@apollo/client";
+import {
+  GET_PATIENTS
+} from "../../graphql/patients/queries/getPatients";
+import {
+  CREATE_APPOINTMENT
+} from "../../graphql/appointments/mutations/createAppointment";
 
 export default Vue.extend({
   name: "AppointmentForm",
@@ -18,9 +39,18 @@ export default Vue.extend({
   data() {
     return {
       patientId: "",
-      scheduleAt: "",
-      reason: ""
+      scheduledAt: "",
+      reason: "",
+      loading: false,
+      error: null as Error | null,
+
+      patients: [] as Patient[],
+      patientsQuery: null as ObservableQuery<GetPatientsData> | null
     }
+  },
+
+  mounted() {
+    this.watchPatients()
   },
 
   watch: {
@@ -30,61 +60,114 @@ export default Vue.extend({
       handler(appointment: Appointment | null)  {
         if(!appointment) {
           this.patientId = ""
-          this.scheduleAt = ""
+          this.scheduledAt = ""
           this.reason = ""
           return;
         }
 
         this.patientId = appointment.patientId;
-        this.scheduleAt = appointment.scheduledAt
+        this.scheduledAt = appointment.scheduledAt
         this.reason = appointment.reason
       }
     }
   },
 
   computed: {
-    patients(): Patient[] {
-      return this.$store.getters["patients/patients"]
-    },
-    loading(): boolean {
-      return this.$store.getters["appointments/loading"]
-    },
-    error(): Error | null {
-      return this.$store.getters["appointments/error"]
-    },
-
     isEditMode(): boolean {
       return !!this.appointment
     }
   },
 
-  async mounted() {
-    await this.$store.dispatch("patients/getPatients")
+  beforeDestroy() {
+    this.patientsQuery?.stopPolling()
   },
 
   methods: {
     async submit() {
-      if(this.isEditMode && this.appointment) {
-        await this.$store.dispatch("appointments/updateAppointment", {
-          id: this.appointment.id,
-          input: {
-            patientId: this.patientId,
-            scheduledAt: this.scheduleAt,
-            reason: this.reason,
+      this.loading = true;
+      this.error = null;
+
+      try {
+        if (this.isEditMode && this.appointment) {
+          const { data } = await apolloClient.mutate<UpdateAppointmentData>({
+            mutation: UPDATE_APPOINTMENT,
+            variables: {
+              id: this.appointment.id,
+              input: {
+                patientId: this.patientId,
+                scheduledAt: this.scheduledAt,
+                reason: this.reason
+              }
+            }
+          })
+
+          if (data?.updateAppointment) {
+            console.log("Updated appointment",data.updateAppointment)
           }
-        })
-      } else {
-        await this.$store.dispatch("appointments/createAppointment", {
-          patientId: this.patientId,
-          scheduledAt: this.scheduleAt,
-          reason: this.reason,
-        })
+        } else {
+          const { data } = await apolloClient.mutate<CreateAppointmentData>({
+            mutation: CREATE_APPOINTMENT,
+            variables: {
+              input: {
+                patientId: this.patientId,
+                scheduledAt: this.scheduledAt,
+                reason: this.reason
+              }
+            },
+            update(cache, {data}) {
+              if (!data?.createAppointment) {
+                return;
+              }
+
+              const newPatientRef = cache.writeFragment({
+                data: data.createAppointment,
+                fragment: APPOINTMENT_FIELDS
+              });
+
+              cache.modify({
+                fields: {
+                  appointments(existingAppointments = []) {
+                    return [
+                      ...existingAppointments,
+                      newPatientRef
+                    ]
+                  }
+                }
+              })
+            }
+          })
+          console.log("Created appointment",data?.createAppointment)
+        }
+        this.$emit("saved")
+      } catch (error) {
+        this.error = error as Error;
+      } finally {
+        this.loading = false;
       }
+    },
 
-      await this.$store.dispatch("appointments/getAppointments")
+    watchPatients() {
+      this.patientsQuery = apolloClient.watchQuery<GetPatientsData>({
+        query: GET_PATIENTS,
+        fetchPolicy: "cache-and-network",
+        returnPartialData: false
+      })
 
-      this.$emit("saved")
-    }
+      this.patientsQuery.subscribe({
+        next: ({ data, loading }) => {
+          this.loading = loading;
+
+
+          if (data?.patients) {
+            this.patients = data.patients;
+          }
+        },
+        error: (error) => {
+          this.error = error;
+          this.loading = false;
+        }
+      })
+    },
   }
 })
 </script>
@@ -116,8 +199,8 @@ export default Vue.extend({
         <input v-model="patientId" type="text" />
       </div>
       <div>
-        <label>ScheduleAt</label>
-        <input v-model="scheduleAt" type="text" required />
+        <label>ScheduledAt</label>
+        <input v-model="scheduledAt" type="text" required />
       </div>
       <div>
         <label>Reason</label>
