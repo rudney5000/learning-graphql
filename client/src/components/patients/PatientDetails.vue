@@ -78,6 +78,7 @@ export default Vue.extend({
           if(data) {
             this.patient = data.patient;
           }
+          console.log("PATIENT",data?.patient)
         },
 
         error: (error) => {

@@ -67,9 +67,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to: Route, _from: Route, next) => {
-    const initialized = store.getters["auth/initialized"];
-
-    if (!initialized) {
+    if (!store.getters["auth/initialized"]) {
         await store.dispatch("auth/me")
     }
 

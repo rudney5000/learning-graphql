@@ -17,7 +17,7 @@ import {
   APPOINTMENT_FIELDS
 } from "../../graphql/appointments/fragments/appointment";
 import {
-  ObservableQuery
+  ObservableQuery, Reference
 } from "@apollo/client";
 import {
   GET_PATIENTS
@@ -119,17 +119,56 @@ export default Vue.extend({
                 return;
               }
 
-              const newPatientRef = cache.writeFragment({
-                data: data.createAppointment,
+              const newAppointment = data.createAppointment
+
+              const newAppointmentRef = cache.writeFragment({
+                data: newAppointment,
                 fragment: APPOINTMENT_FIELDS
               });
 
+              const patientCacheId = cache.identify({
+                __typename: "Patient",
+                id: newAppointment.patientId
+              })
+
+              if(patientCacheId) {
+                cache.modify({
+                  id: patientCacheId,
+                  fields: {
+                    appointments(existingAppointments = [], { readField }) {
+                      const exists = existingAppointments.some(
+                          (appointmentRef: Reference) =>
+                              readField("id", appointmentRef) === newAppointment.id
+                      )
+
+                      if(exists) {
+                        return existingAppointments
+                      }
+
+                      return [
+                        ...existingAppointments,
+                        newAppointmentRef
+                      ]
+                    }
+                  }
+                })
+              }
+
               cache.modify({
                 fields: {
-                  appointments(existingAppointments = []) {
+                  appointments(existingAppointments = [], { readField }) {
+                    const exists = existingAppointments.some(
+                        (appointmentRef: Reference) =>
+                            readField("id", appointmentRef) === newAppointment.id
+                    )
+
+                    if(exists) {
+                      return existingAppointments
+                    }
+
                     return [
                       ...existingAppointments,
-                      newPatientRef
+                      newAppointmentRef
                     ]
                   }
                 }

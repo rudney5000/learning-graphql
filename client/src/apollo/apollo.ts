@@ -2,21 +2,58 @@ import {
     ApolloClient,
     InMemoryCache,
     createHttpLink,
-    from
+    ServerError,
+    CombinedGraphQLErrors
 } from "@apollo/client";
-import {setContext} from "@apollo/client/link/context";
-import {errorLink} from "./errorLink";
+import {
+    SetContextLink
+} from "@apollo/client/link/context";
+import {
+    ErrorLink
+} from "@apollo/client/link/error";
+import {
+    clearAccessToken,
+    getAccessToken
+} from "../store/modules/auth";
+import router from "../router";
 
-const authLink = setContext((_, { headers }) => {
-    const token = localStorage.getItem("access_token")
+const authLink = new SetContextLink((prevContext, operation) => {
+    const token = getAccessToken()
 
     return {
         headers: {
-            ...headers,
+            ...prevContext.headers,
             authorization: token
                 ? `Bearer ${token}`
                 : ""
         }
+    }
+})
+
+const errorLink = new ErrorLink(({ error, operation }) => {
+    console.log(
+        `[Apollo Error] ${operation.operationName}`,
+        error
+    )
+
+    if (ServerError.is(error) && error.statusCode === 401) {
+        console.log("JWT expired or unauthorized")
+
+        clearAccessToken()
+
+        if (router.currentRoute.path !== "/login") {
+            router.push("/login")
+        }
+    }
+
+    if(CombinedGraphQLErrors.is(error)) {
+        error.errors.forEach((graphQLError) => {
+            console.error(
+                `[GraphQL error] ${operation.operationName}`,
+                graphQLError.message,
+                graphQLError.extensions
+            )
+        })
     }
 })
 
@@ -25,10 +62,6 @@ const httpLink = createHttpLink({
 });
 
 export const apolloClient = new ApolloClient({
-    link: from([
-        errorLink,
-        authLink,
-        httpLink
-    ]),
+    link: errorLink.concat(authLink).concat(httpLink),
     cache: new InMemoryCache(),
 });

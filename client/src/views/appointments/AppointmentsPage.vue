@@ -2,7 +2,7 @@
 import Vue from 'vue'
 import AppointmentDetails from "../../components/appointments/AppointmentDetails.vue";
 import AppointmentList from "../../components/appointments/AppointmentList.vue";
-import {Appointment} from "../../types/types.ts";
+import {Appointment} from "../../types/types";
 import AppointmentForm from "../../components/appointments/AppointmentForm.vue";
 
 export default Vue.extend({
@@ -18,25 +18,18 @@ export default Vue.extend({
       showForm: false,
       selectedAppointmentId: null as string | null,
       selectedAppointment: null as Appointment | null,
-    }
-  },
-
-  computed: {
-    appointment(): Appointment | null {
-      return this.$store.getters["appointments/appointment"];
+      appointmentToEdit: null as Appointment | null,
     }
   },
 
   methods: {
     openCreateForm() {
-      this.$store.commit("appointments/SET_APPOINTMENT", null);
+      this.appointmentToEdit = null;
       this.showForm = true;
     },
 
-    openEditForm() {
-      if(!this.appointment){
-        return;
-      }
+    openEditForm(appointment: Appointment) {
+      this.appointmentToEdit = appointment
       this.showForm = true;
     },
 
@@ -55,17 +48,28 @@ export default Vue.extend({
   <section>
     <h1>Appointments</h1>
 
-    <button @click="openCreateForm">
+    <button
+        @click="openCreateForm"
+    >
       Create Appointment
     </button>
-    <AppointmentList @select="selectAppointment"/>
-    <AppointmentDetails :appointment-id="selectedAppointmentId" @edit="openEditForm"/>
-    <div v-if="showForm">
+    <AppointmentList
+        @select="selectAppointment"
+    />
+    <AppointmentDetails
+        :appointment-id="selectedAppointmentId"
+        @edit="openEditForm"
+    />
+    <div
+        v-if="showForm"
+    >
       <AppointmentForm
-          :appointment="selectedAppointment"
+          :appointment="appointmentToEdit"
           @saved="closeForm"
       />
-      <button @click="closeForm">
+      <button
+          @click="closeForm"
+      >
         Cancel
       </button>
     </div>

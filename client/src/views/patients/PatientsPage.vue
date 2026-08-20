@@ -17,25 +17,19 @@ export default Vue.extend({
     return {
       showForm: false,
       selectedPatientId: null as string | null,
-    }
-  },
-
-  computed: {
-    patient(): Patient | null {
-      return this.$store.getters["patients/patient"]
+      selectedPatient: null as Patient | null,
+      patientToEdit: null as Patient | null,
     }
   },
 
   methods: {
     openCreateForm() {
-      this.$store.commit("patients/SET_PATIENT", null)
+      this.patientToEdit = null
       this.showForm = true;
     },
 
-    openEditForm() {
-      if(!this.patient) {
-        return;
-      }
+    openEditForm(patient: Patient) {
+      this.patientToEdit = patient
       this.showForm = true;
     },
 
@@ -53,15 +47,29 @@ export default Vue.extend({
   <section>
     <p>Patients</p>
 
-    <button @click="openCreateForm">
+    <button
+        @click="openCreateForm"
+    >
       Create Patient
     </button>
-    <PatientList @select="selectPatient"/>
-    <PatientDetails :patient-id="selectedPatientId" @edit="openEditForm" />
+    <PatientList
+        @select="selectPatient"
+    />
+    <PatientDetails
+        :patient-id="selectedPatientId"
+        @edit="openEditForm"
+    />
 
-    <div v-if="showForm">
-      <PatientForm :patient="patient" @saved="closeForm"/>
-      <button @click="closeForm">
+    <div
+        v-if="showForm"
+    >
+      <PatientForm
+          :patient="patientToEdit"
+          @saved="closeForm"
+      />
+      <button
+          @click="closeForm"
+      >
         Cancel
       </button>
     </div>

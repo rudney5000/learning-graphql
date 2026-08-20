@@ -18,12 +18,23 @@ import {
     MeData,
     User
 } from "../../types/types";
+import {
+    RootState
+} from "../index";
 
-export interface RootState {
-    auth: AuthState;
+export function getAccessToken(): string | null {
+    return localStorage.getItem("access_token");
 }
 
-interface AuthState {
+export function setAccessToken(token: string): void {
+    localStorage.setItem("access_token", token);
+}
+
+export function clearAccessToken(): void {
+    localStorage.removeItem("access_token");
+}
+
+export interface AuthState {
     token: string | null;
     user: User | null;
     loading: boolean;
@@ -92,7 +103,7 @@ const actions: ActionTree<AuthState, RootState> = {
             }
 
             const { token, user } = data.login
-            localStorage.setItem("access_token", token)
+            setAccessToken(token)
             commit("SET_AUTH", {
                 token,
                 user
@@ -111,7 +122,6 @@ const actions: ActionTree<AuthState, RootState> = {
         commit("SET_ERROR", null)
 
         try {
-            const token = localStorage.getItem("access_token");
 
             const { data } = await apolloClient.query<MeData>({
                 query: ME,
@@ -119,14 +129,14 @@ const actions: ActionTree<AuthState, RootState> = {
             })
 
             if (!data?.me) {
-                localStorage.getItem("access_token");
+                clearAccessToken()
                 commit("LOGOUT")
                 return
             }
 
             commit("SET_USER",  data.me)
         } catch (error) {
-            localStorage.removeItem("access_token")
+            clearAccessToken()
 
             commit("LOGOUT")
             commit("SET_ERROR", error as Error)
@@ -137,7 +147,7 @@ const actions: ActionTree<AuthState, RootState> = {
     },
 
     logout({ commit }) {
-        localStorage.removeItem("access_token");
+        clearAccessToken()
         commit("LOGOUT");
     }
 }
