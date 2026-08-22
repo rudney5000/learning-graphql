@@ -6,7 +6,9 @@ import {
   Patient,
   UpdatePatientData
 } from "../../types/types";
-import {ObservableQuery} from "@apollo/client";
+import {
+  ObservableQuery
+} from "@apollo/client";
 import {
   apolloClient
 } from "../../apollo/apollo";

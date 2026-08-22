@@ -6,7 +6,9 @@ import {
   GetAppointmentData,
   UpdateAppointmentData
 } from "../../types/types";
-import {ObservableQuery} from "@apollo/client";
+import {
+  ObservableQuery
+} from "@apollo/client";
 import {
   apolloClient
 } from "../../apollo/apollo";
@@ -29,6 +31,7 @@ export default Vue.extend({
       error: null as Error | null,
       appointment: null as Appointment | null,
       appointmentQuery: null as ObservableQuery<GetAppointmentData> | null,
+      subscription: null as ReturnType<ObservableQuery<GetAppointmentData>["subscribe"]> | null,
     }
   },
 
@@ -53,12 +56,12 @@ export default Vue.extend({
   },
 
   beforeDestroy() {
-    this.appointmentQuery?.stopPolling()
+    this.subscription?.unsubscribe()
   },
 
   methods: {
     watchAppointment(id: string) {
-      this.appointmentQuery?.stopPolling()
+      this.subscription?.unsubscribe()
 
       this.loading = true
       this.error = null
@@ -71,11 +74,11 @@ export default Vue.extend({
         fetchPolicy: "cache-and-network"
       })
 
-      this.appointmentQuery?.subscribe({
+      this.subscription = this.appointmentQuery?.subscribe({
         next: ({ data, loading }) => {
           this.loading = loading
 
-          if(data) {
+          if(data?.appointment) {
             this.appointment = data.appointment
           }
         },
