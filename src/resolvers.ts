@@ -43,6 +43,11 @@ interface AppointmentArgs {
     id: string;
 }
 
+interface AppointmentsArgs {
+    page?: number;
+    limit?: number;
+}
+
 interface CreatePatientArgs {
     input: {
         firstName: string;
@@ -91,8 +96,20 @@ export const resolvers = {
         patients: (): Patient[] => {
             return fakePatients;
         },
-        appointments: (): Appointment[] => {
-            return fakeAppointments;
+        appointments: (
+            _parent: unknown,
+            args: AppointmentsArgs
+        )=> {
+            const page = args.page ?? 1
+            const limit = args.limit ?? 5
+
+            const start = (page - 1) * limit
+            const items = fakeAppointments.slice(start, start + limit)
+            return {
+                items,
+                total: fakeAppointments.length,
+                hasNext: start + limit < fakeAppointments.length,
+            };
         },
 
         patient: (

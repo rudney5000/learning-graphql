@@ -72,8 +72,14 @@ export interface Appointment {
     reason: string;
 }
 
+export interface AppointmentConnection {
+    items: Appointment[];
+    total: number
+    hasNext: boolean
+}
+
 export interface GetAppointmentsData {
-    appointments: Appointment[];
+    appointments: AppointmentConnection;
 }
 
 export interface GetAppointmentData {

@@ -25,7 +25,11 @@ export default Vue.extend({
       loading: false,
       error: null as Error | null,
       appointments: [] as Appointment[],
-      appointmentsQuery: null as ObservableQuery<GetAppointmentsData> | null
+      currentPage: 1,
+      limit: 2,
+      hasNext: false,
+      appointmentsQuery: null as ObservableQuery<GetAppointmentsData> | null,
+      subscription: null as ReturnType<ObservableQuery<GetAppointmentsData>["subscribe"]> | null,
     }
   },
 
@@ -63,19 +67,42 @@ export default Vue.extend({
       }
     },
 
+    async loadMore() {
+      if (!this.appointmentsQuery) {
+        return;
+      }
+
+      if (!this.hasNext) {
+        return;
+      }
+
+      await this.appointmentsQuery.fetchMore({
+        variables: {
+          page: this.currentPage + 1,
+          limit: this.limit,
+        }
+      })
+      this.currentPage++
+    },
+
     watchAppointments() {
       this.appointmentsQuery = apolloClient.watchQuery<GetAppointmentsData>({
         query: GET_APPOINTMENTS,
+        variables: {
+          page: this.currentPage,
+          limit: this.limit
+        },
         fetchPolicy: "cache-and-network",
         returnPartialData: false
       })
 
-      this.appointmentsQuery.subscribe({
+      this.subscription = this.appointmentsQuery.subscribe({
         next: ({ data, loading }) => {
           this.loading = loading
 
           if (data?.appointments) {
-            this.appointments = data.appointments
+            this.appointments = data.appointments.items
+            this.hasNext = data.appointments.hasNext
           }
         },
         error: (error) => {
@@ -83,7 +110,7 @@ export default Vue.extend({
           this.loading = false;
         }
       })
-    }
+    },
   },
 
 
@@ -116,6 +143,12 @@ export default Vue.extend({
 
         <button @click="deleteAppointment(appointment.id)">
           Delete
+        </button>
+        <button
+            v-if="hasNext"
+            @click="loadMore"
+        >
+          Load More
         </button>
       </li>
     </ul>

@@ -23,12 +23,18 @@ export const typeDefs = `#graphql
         reason: String!
     }
 
+    type AppointmentConnection {
+        items: [Appointment!]!
+        total: Int!
+        hasNext: Boolean!
+    }
+
     type Query {
         me: User!
         patients: [Patient!]!
         patient(id: ID!): Patient
         
-        appointments: [Appointment!]!
+        appointments(page: Int limit: Int): AppointmentConnection!
         appointment(id: ID!): Appointment
     }
 
