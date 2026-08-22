@@ -68,14 +68,36 @@ const cache = new InMemoryCache({
                 appointments: {
                     keyArgs: false,
 
-                    merge(existing, incoming){
+                    merge(existing, incoming, { readField }){
+                        const existingItems = existing?.items ?? []
+                        const incomingItems = incoming?.items ?? []
+                        const items = [...existingItems]
+
+                        for(const incomingItem of incomingItems) {
+                            const incomingId = readField<string>("id", incomingItem)
+
+                            const exists = items.some(
+                                item => readField<string>("id", item) === incomingId
+                            )
+
+                            if(!exists) {
+                                items.push(incomingItem)
+                            }
+                        }
+
+                        items.sort((a, b) => {
+                            const dateA = readField<string>("scheduledAt", a)
+                            const dateB = readField<string>("scheduledAt", b)
+
+                            return(
+                                new Date(dateA ?? "").getTime() -
+                                new Date(dateB ?? "").getTime()
+                            )
+                        })
+
                         return {
                             ...incoming,
-
-                            items: [
-                                ...(existing?.items ?? []),
-                                ...incoming.items
-                            ]
+                            items
                         }
                     }
                 }

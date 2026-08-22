@@ -144,15 +144,15 @@ export default Vue.extend({
         <button @click="deleteAppointment(appointment.id)">
           Delete
         </button>
-        <button
-            v-if="hasNext"
-            @click="loadMore"
-        >
-          Load More
-        </button>
       </li>
     </ul>
 
+    <button
+        v-if="hasNext"
+        @click="loadMore"
+    >
+      Load More
+    </button>
   </section>
 </template>
 

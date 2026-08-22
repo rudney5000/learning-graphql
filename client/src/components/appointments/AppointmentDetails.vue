@@ -90,28 +90,36 @@ export default Vue.extend({
       })
     },
 
-    async updateAppointment() {
-      if(!this.appointment) {
+    // async updateAppointment() {
+    //   if(!this.appointment) {
+    //     return
+    //   }
+    //   this.error = null
+    //   try {
+    //     const { data } = await apolloClient.mutate<UpdateAppointmentData>({
+    //       mutation: UPDATE_APPOINTMENT,
+    //       variables: {
+    //         id: this.appointment.id,
+    //         input: {
+    //           reason: "Consultation Updated"
+    //         }
+    //       }
+    //     })
+    //
+    //     if (data?.updateAppointment) {
+    //       console.log("Updated appointment",data.updateAppointment)
+    //     }
+    //   } catch (error) {
+    //     this.error = error as Error
+    //   }
+    // },
+
+    editAppointment() {
+      if (!this.appointment) {
         return
       }
-      this.error = null
-      try {
-        const { data } = await apolloClient.mutate<UpdateAppointmentData>({
-          mutation: UPDATE_APPOINTMENT,
-          variables: {
-            id: this.appointment.id,
-            input: {
-              reason: "Consultation Updated"
-            }
-          }
-        })
 
-        if (data?.updateAppointment) {
-          console.log("Updated appointment",data.updateAppointment)
-        }
-      } catch (error) {
-        this.error = error as Error
-      }
+      this.$emit("edit", this.appointment)
     },
 
     async deleteAppointment() {
@@ -180,7 +188,7 @@ export default Vue.extend({
     </p>
     <button
         v-if="appointment"
-        @click="updateAppointment"
+        @click="editAppointment"
     >
       Edit Appointment
     </button>

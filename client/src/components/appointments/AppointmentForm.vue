@@ -17,7 +17,8 @@ import {
   APPOINTMENT_FIELDS
 } from "../../graphql/appointments/fragments/appointment";
 import {
-  ObservableQuery, Reference
+  ObservableQuery,
+  Reference
 } from "@apollo/client";
 import {
   GET_PATIENTS
@@ -89,14 +90,114 @@ export default Vue.extend({
 
       try {
         if (this.isEditMode && this.appointment) {
+          const previousPatientId = this.appointment.patientId
+
           const { data } = await apolloClient.mutate<UpdateAppointmentData>({
             mutation: UPDATE_APPOINTMENT,
+
             variables: {
               id: this.appointment.id,
               input: {
                 patientId: this.patientId,
                 scheduledAt: this.scheduledAt,
                 reason: this.reason
+              }
+            },
+
+            update(cache, { data }) {
+              const updatedAppointment = data?.updateAppointment
+
+              if (!updatedAppointment) {
+                return;
+              }
+
+              const appointmentRef = cache.writeFragment({
+                data: updatedAppointment,
+                fragment: APPOINTMENT_FIELDS
+              });
+
+              cache.modify({
+                fields: {
+                  appointments(existingConnection, { readField }) {
+                    if(!existingConnection) {
+                      return existingConnection
+                    }
+
+                    const existingItems = existingConnection.items ?? []
+
+                    const items = existingItems.filter(
+                        (ref: Reference) =>
+                            readField("id", ref) !== updatedAppointment.id
+                    )
+
+                    items.push(appointmentRef)
+
+                    items.sort((a: Reference, b: Reference) => {
+                      const dateA = readField<string>("scheduledAt", a)
+                      const dateB = readField<string>("scheduledAt", b)
+
+                      return (
+                          new Date(dateA ?? "").getTime() -
+                          new Date(dateB ?? "").getTime()
+                      )
+                    })
+                    return {
+                      ...existingConnection,
+                      items
+                    }
+                  }
+                }
+              })
+
+              const previousPatientCacheId = cache.identify({
+                __typename: "Patient",
+                id: previousPatientId
+              })
+
+              if(previousPatientCacheId) {
+                cache.modify({
+                  id: previousPatientCacheId,
+                  fields: {
+                    appointments(existingAppointments = [], { readField }) {
+                      return existingAppointments.filter(
+                          (appointmentRef: Reference) =>
+                              readField("id", appointmentRef) !== updatedAppointment.id
+                      )
+                    }
+                  }
+                })
+              }
+
+              const newPatientCacheId = cache.identify({
+                __typename: "Patient",
+                id: updatedAppointment.patientId
+              })
+
+              if(newPatientCacheId) {
+                cache.modify({
+                  id: newPatientCacheId,
+                  fields: {
+                    appointments(existingAppointments = [], { readField }) {
+                      const appointments = existingAppointments.filter(
+                          (appointmentRef: Reference) =>
+                              readField("id", appointmentRef) !== updatedAppointment.id
+                      )
+
+                      appointments.push(appointmentRef)
+
+                      appointments.sort((a: Reference, b: Reference) => {
+                        const dateA = readField<string>("scheduledAt", a)
+                        const dateB = readField<string>("scheduledAt", b)
+
+                        return (
+                            new Date(dateA ?? "").getTime() -
+                            new Date(dateB ?? "").getTime()
+                        )
+                      })
+                      return appointments
+                    }
+                  }
+                })
               }
             }
           })
@@ -115,11 +216,10 @@ export default Vue.extend({
               }
             },
             update(cache, {data}) {
-              if (!data?.createAppointment) {
+              const newAppointment = data?.createAppointment
+              if (!newAppointment) {
                 return;
               }
-
-              const newAppointment = data.createAppointment
 
               const newAppointmentRef = cache.writeFragment({
                 data: newAppointment,
@@ -136,19 +236,31 @@ export default Vue.extend({
                   id: patientCacheId,
                   fields: {
                     appointments(existingAppointments = [], { readField }) {
-                      const exists = existingAppointments.some(
+                      const alreadyExists = existingAppointments.some(
                           (appointmentRef: Reference) =>
                               readField("id", appointmentRef) === newAppointment.id
                       )
 
-                      if(exists) {
+                      if(alreadyExists) {
                         return existingAppointments
                       }
 
-                      return [
+                      const appointments = [
                         ...existingAppointments,
                         newAppointmentRef
                       ]
+
+                      appointments.sort((a, b) => {
+                        const dateA = readField<string>("scheduledAt", a)
+                        const dateB = readField<string>("scheduledAt", b)
+
+                        return (
+                            new Date(dateA ?? "").getTime() -
+                            new Date(dateB ?? "").getTime()
+                        )
+                      })
+
+                      return appointments
                     }
                   }
                 })
@@ -156,20 +268,41 @@ export default Vue.extend({
 
               cache.modify({
                 fields: {
-                  appointments(existingAppointments = [], { readField }) {
-                    const exists = existingAppointments.some(
+                  appointments(existingConnection, { readField }) {
+                    if(!existingConnection) {
+                      return existingConnection
+                    }
+
+                    const existingItems = existingConnection.items ?? []
+
+                    const alreadyExists = existingItems.some(
                         (appointmentRef: Reference) =>
                             readField("id", appointmentRef) === newAppointment.id
                     )
 
-                    if(exists) {
-                      return existingAppointments
+                    if(alreadyExists) {
+                      return existingConnection
                     }
 
-                    return [
-                      ...existingAppointments,
+                    const items = [
+                      ...existingItems,
                       newAppointmentRef
                     ]
+
+                    items.sort((a: Reference, b: Reference) => {
+                      const dateA = readField<string>("scheduledAt", a)
+                      const dateB = readField<string>("scheduledAt", b)
+
+                      return (
+                          new Date(dateA ?? "").getTime() -
+                          new Date(dateB ?? "").getTime()
+                      )
+                    })
+                    return {
+                      ...existingConnection,
+                      items,
+                      total: existingConnection.total + 1
+                    }
                   }
                 }
               })
