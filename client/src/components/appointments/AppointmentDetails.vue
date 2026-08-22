@@ -3,8 +3,7 @@ import Vue from 'vue'
 import {
   Appointment,
   DeleteAppointmentData,
-  GetAppointmentData,
-  UpdateAppointmentData
+  GetAppointmentData
 } from "../../types/types";
 import {
   ObservableQuery
@@ -15,9 +14,6 @@ import {
 import {
   GET_APPOINTMENT
 } from "../../graphql/appointments/queries/getAppointment";
-import {
-  UPDATE_APPOINTMENT
-} from "../../graphql/appointments/mutations/updateAppointment";
 import {
   DELETE_APPOINTMENT
 } from "../../graphql/appointments/mutations/deleteAppointment";
@@ -89,30 +85,6 @@ export default Vue.extend({
         }
       })
     },
-
-    // async updateAppointment() {
-    //   if(!this.appointment) {
-    //     return
-    //   }
-    //   this.error = null
-    //   try {
-    //     const { data } = await apolloClient.mutate<UpdateAppointmentData>({
-    //       mutation: UPDATE_APPOINTMENT,
-    //       variables: {
-    //         id: this.appointment.id,
-    //         input: {
-    //           reason: "Consultation Updated"
-    //         }
-    //       }
-    //     })
-    //
-    //     if (data?.updateAppointment) {
-    //       console.log("Updated appointment",data.updateAppointment)
-    //     }
-    //   } catch (error) {
-    //     this.error = error as Error
-    //   }
-    // },
 
     editAppointment() {
       if (!this.appointment) {
