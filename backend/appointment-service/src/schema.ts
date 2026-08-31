@@ -4,6 +4,14 @@ export const typeDefs = `#graphql
         patientId: ID!,
         scheduledAt: String!
         reason: String!
+        patient: Patient
+    }
+
+    type Patient {
+        id: ID!
+        firstName: String!
+        lastName: String!
+        appointments: [Appointment!]!
     }
     
     type AppointmentConnection {

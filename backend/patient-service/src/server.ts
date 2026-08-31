@@ -17,7 +17,16 @@ await server.start();
 app.use(
     '/graphql',
     express.json(),
-    expressMiddleware(server)
+    expressMiddleware(server, {
+        context: async ({ req }) => {
+            return {
+                user: {
+                    id: "user-1",
+                    role: "DOCTOR"
+                }
+            }
+        }
+    })
 );
 
 app.listen(PORT, () => {

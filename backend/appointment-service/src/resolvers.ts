@@ -1,6 +1,7 @@
 import type {
     Appointment,
 } from "./types";
+import {getPatient} from "./clients/patientClient";
 
 const appointments: Appointment[] = [
     {
@@ -74,6 +75,8 @@ export const resolvers = {
             args: AppointmentArgs,
         ): Appointment | undefined => {
 
+            // patient: async(appointment) => {}
+
             return appointments.find(
                 (appointment) => appointment.id === args.id
             )
@@ -81,7 +84,19 @@ export const resolvers = {
     },
 
     Mutation: {
-        createAppointment: (_appointment: unknown, args: CreateAppointmentArgs): Appointment => {
+        createAppointment: async (
+            _appointment: unknown,
+            args: CreateAppointmentArgs
+        ): Promise<Appointment> => {
+
+            const patient = await getPatient(args.input.patientId)
+
+            if (!patient) {
+                throw new Error(
+                    `Patient ${args.input.patientId} not found. Please try again.`
+                )
+            }
+
             const newAppointment: Appointment = {
                 id: `a${nextAppointmentId++}`,
                 patientId: args.input.patientId,

@@ -1,4 +1,5 @@
 import {Patient} from "./types";
+import {GraphQLContext, requireRole} from "./auth";
 
 const patients: Patient[] = [
     {
@@ -48,7 +49,7 @@ export const resolvers = {
         ): Patient | undefined => {
             console.log("USER:", context.user);
 
-            requireRole(context, "DOCTOR");
+            requireRole(context, ["DOCTOR", "NURSE"]);
 
             return patients.find(
                 (patient) => patient.id === args.id
